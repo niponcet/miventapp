@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MiVentAPP — Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0F1419;
+            --surface: #1A2129;
+            --surface-2: #212A34;
+            --surface-3: #262F3A;
+            --border: #2A333D;
+            --border-soft: #232B34;
+            --text: #E7EBEF;
+            --text-dim: #8B95A3;
+            --text-faint: #5B6472;
+            --accent: #5B8DEF;
+            --accent-soft: rgba(91, 141, 239, 0.12);
+            --profit: #4F9E82;
+            --profit-soft: rgba(79, 158, 130, 0.12);
+            --warn: #D98B4F;
+            --warn-soft: rgba(217, 139, 79, 0.12);
+            --danger: #C0526B;
+            --danger-soft: rgba(192, 82, 107, 0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            font-size: 14px;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ---------- SIDEBAR ---------- */
+        .sidebar {
+            width: 236px;
+            height: 100vh;
+            flex-shrink: 0;
+            background: var(--surface);
+            border-right: 1px solid var(--border-soft);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 14px;
+            overflow: hidden;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 8px 20px 8px;
+            border-bottom: 1px solid var(--border-soft);
+            margin-bottom: 16px;
+        }
+
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(155deg, var(--accent), #3E6BC4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 15px;
+            color: #0F1419;
+            flex-shrink: 0;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.15;
+        }
+
+        .brand-text .name {
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 15.5px;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-text .sub {
+            font-size: 11px;
+            color: var(--text-faint);
+            letter-spacing: 0.03em;
+        }
+
+        .nav-label {
+            font-size: 10.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-faint);
+            padding: 14px 12px 8px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text-dim);
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 2px;
+            transition: background .12s, color .12s;
+        }
+
+        .nav-item svg {
+            width: 17px;
+            height: 17px;
+            flex-shrink: 0;
+            opacity: 0.85;
+        }
+
+        .nav-item:hover {
+            background: var(--surface-2);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .nav-item.active svg {
+            opacity: 1;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-soft);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 8px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            background: var(--surface-3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk';
+            font-weight: 600;
+            font-size: 12.5px;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        .user-meta {
+            line-height: 1.2;
+        }
+
+        .user-meta .u-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-meta .u-role {
+            font-size: 11px;
+            color: var(--text-faint);
+        }
+
+        /* ---------- MAIN ---------- */
+        .main {
+            flex: 1;
+            height: 100vh;
+            padding: 22px 28px 20px;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .topbar h1 {
+            font-family: 'Space Grotesk';
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .topbar .date-line {
+            font-size: 12.5px;
+            color: var(--text-faint);
+            margin-top: 4px;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .datepicker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 14px;
+            font-size: 13px;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .datepicker svg {
+            width: 15px;
+            height: 15px;
+            color: var(--text-dim);
+        }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: #0B1220;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* ---------- KPI ROW ---------- */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 16px 18px 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+        }
+
+        .kpi-card.c-accent::before {
+            background: var(--accent);
+        }
+
+        .kpi-card.c-profit::before {
+            background: var(--profit);
+        }
+
+        .kpi-card.c-warn::before {
+            background: var(--warn);
+        }
+
+        .kpi-card.c-danger::before {
+            background: var(--danger);
+        }
+
+        .kpi-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .kpi-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .kpi-icon svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .c-accent .kpi-icon {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .c-profit .kpi-icon {
+            background: var(--profit-soft);
+            color: var(--profit);
+        }
+
+        .c-warn .kpi-icon {
+            background: var(--warn-soft);
+            color: var(--warn);
+        }
+
+        .c-danger .kpi-icon {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .kpi-value {
+            font-family: 'JetBrains Mono';
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .kpi-sub {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-faint);
+        }
+
+        .kpi-sub .delta-up {
+            color: var(--profit);
+            font-weight: 600;
+        }
+
+        .kpi-sub .delta-down {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        /* ---------- CONTENT GRID ---------- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.55fr 1fr;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            gap: 14px;
+        }
+
+        .col-left .panel {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-left .panel .table-wrap {
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 18px 20px 10px;
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .panel-title {
+            font-family: 'Space Grotesk';
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .panel-title .count {
+            color: var(--text-faint);
+            font-weight: 500;
+            font-size: 12.5px;
+            margin-left: 6px;
+        }
+
+        .panel-link {
+            font-size: 12.5px;
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Ledger-style table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            font-size: 10.5px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-faint);
+            font-weight: 600;
+            padding: 0 8px 8px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        thead th.num {
+            text-align: right;
+        }
+
+        tbody td {
+            padding: 9px 8px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-soft);
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        td.num {
+            text-align: right;
+            font-family: 'JetBrains Mono';
+            font-weight: 500;
+        }
+
+        td.prod {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prod-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .prod-name {
+            font-weight: 500;
+        }
+
+        .prod-cat {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 1px;
+        }
+
+        .qty-badge {
+            display: inline-block;
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono';
+            color: var(--text-dim);
+        }
+
+        .profit-cell {
+            color: var(--profit);
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .qa-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: border-color .12s, background .12s;
+        }
+
+        .qa-item:hover {
+            border-color: var(--border);
+            background: var(--surface-3);
+        }
+
+        .qa-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .qa-icon svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .qa-sale .qa-icon {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .qa-stock .qa-icon {
+            background: var(--profit-soft);
+            color: var(--profit);
+        }
+
+        .qa-close .qa-icon {
+            background: var(--warn-soft);
+            color: var(--warn);
+        }
+
+        .qa-text .t {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .qa-text .d {
+            font-size: 11.5px;
+            color: var(--text-faint);
+            margin-top: 1px;
+        }
+
+        /* Stock crítico */
+        .stock-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 8px;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .stock-item:last-child {
+            border-bottom: none;
+        }
+
+        .stock-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .stock-left-label {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 2px;
+        }
+
+        .stock-pill {
+            font-family: 'JetBrains Mono';
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 6px;
+        }
+
+        .stock-pill.critical {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .stock-pill.low {
+            background: var(--warn-soft);
+            color: var(--warn);
+        }
+
+        /* WhatsApp/cierre panel */
+        .closing-panel {
+            background: linear-gradient(160deg, var(--surface-2), var(--surface));
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            flex-shrink: 0;
+        }
+
+        .closing-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .closing-head .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--profit);
+            box-shadow: 0 0 0 3px var(--profit-soft);
+        }
+
+        .closing-head .t {
+            font-size: 13.5px;
+            font-weight: 600;
+            font-family: 'Space Grotesk';
+        }
+
+        .closing-desc {
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .closing-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12.5px;
+            padding: 7px 0;
+            border-top: 1px dashed var(--border);
+        }
+
+        .closing-row:first-of-type {
+            border-top: none;
+        }
+
+        .closing-row .val {
+            font-family: 'JetBrains Mono';
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">MV</div>
+            <div class="brand-text">
+                <span class="name">MiVentAPP</span>
+                <span class="sub">Panel de control</span>
+            </div>
+        </div>
+
+        <div class="nav-label" style="padding-top:0;">General</div>
+        <div class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                <rect x="3" y="16" width="7" height="5" rx="1.5" />
+            </svg>
+            Analítica
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7l9-4 9 4-9 4-9-4z" />
+                <path d="M3 7v10l9 4 9-4V7" />
+                <path d="M12 11v10" />
+            </svg>
+            Catálogo
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="6" width="18" height="14" rx="2" />
+                <path d="M3 10h18" />
+                <path d="M8 14h4" />
+            </svg>
+            Inventario
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="20" r="1.4" />
+                <circle cx="17" cy="20" r="1.4" />
+                <path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6" />
+            </svg>
+            Ventas
+        </div>
+        <div class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.5 11.5a8.5 8.5 0 1 1-3.3-6.7" />
+                <path d="M21 4v5h-5" />
+            </svg>
+            Cierre de caja
+        </div>
+
+        <div style="margin-top:auto; padding-top:8px; border-top:1px solid var(--border-soft);">
+            <div class="nav-item" style="margin-top:8px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 8.5a5 5 0 1 0-9.8 1.5L3 21l6.5-2a5 5 0 0 0 7.5-4.5" />
+                </svg>
+                Notificaciones
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                Configuración
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="avatar">JP</div>
+            <div class="user-meta">
+                <div class="u-name">Juan Pérez</div>
+                <div class="u-role">Administrador</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <h1>Analítica de desempeño</h1>
+                <div class="date-line">Jornada del viernes 14 de agosto, 2026</div>
+            </div>
+            <div class="topbar-actions">
+                <div class="datepicker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg>
+                    14 ago 2026
+                </div>
+                <button class="btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                        <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Nueva venta
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI ROW -->
+        <div class="kpi-row">
+            <div class="kpi-card c-accent">
+                <div class="kpi-top">
+                    <span class="kpi-label">Total vendido hoy</span>
+                    <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="20" r="1.4" />
+                            <circle cx="17" cy="20" r="1.4" />
+                            <path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6" />
+                        </svg></div>
+                </div>
+                <div class="kpi-value">$486.500</div>
+                <div class="kpi-sub"><span class="delta-up">▲ 12,4%</span> vs. ayer</div>
+            </div>
+
+            <div class="kpi-card c-profit">
+                <div class="kpi-top">
+                    <span class="kpi-label">Ganancia neta</span>
+                    <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        </svg></div>
+                </div>
+                <div class="kpi-value">$168.900</div>
+                <div class="kpi-sub">Margen promedio 34,7%</div>
+            </div>
+
+            <div class="kpi-card c-accent">
+                <div class="kpi-top">
+                    <span class="kpi-label">Transacciones</span>
+                    <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <path d="M2 10h20" />
+                        </svg></div>
+                </div>
+                <div class="kpi-value">37</div>
+                <div class="kpi-sub">Ticket promedio $13.148</div>
+            </div>
+
+            <div class="kpi-card c-warn">
+                <div class="kpi-top">
+                    <span class="kpi-label">Productos en stock crítico</span>
+                    <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <path d="M12 9v4M12 17h.01" />
+                        </svg></div>
+                </div>
+                <div class="kpi-value">4</div>
+                <div class="kpi-sub">Revisar antes del cierre</div>
+            </div>
+        </div>
+
+        <!-- CONTENT GRID -->
+        <div class="content-grid">
+            <!-- LEFT: sales table -->
+            <div class="col col-left">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div class="panel-title">Detalle de productos vendidos <span class="count">· jornada
+                                actual</span></div>
+                        <div class="panel-link">Ver todo</div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="num">Cant.</th>
+                                    <th class="num">P. venta</th>
+                                    <th class="num">Ganancia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="prod"><span class="prod-dot" style="background:var(--accent)"></span>
+                                        <div>
+                                            <div class="prod-name">Aceite de motor 20W-50</div>
+                                            <div class="prod-cat">Lubricantes</div>
+                                        </div>
+                                    </td>
+                                    <td class="num"><span class="qty-badge">12</span></td>
+                                    <td class="num">$96.000</td>
+                                    <td class="num profit-cell">$28.800</td>
+                                </tr>
+                                <tr>
+                                    <td class="prod"><span class="prod-dot" style="background:var(--profit)"></span>
+                                        <div>
+                                            <div class="prod-name">Filtro de aire universal</div>
+                                            <div class="prod-cat">Repuestos</div>
+                                        </div>
+                                    </td>
+                                    <td class="num"><span class="qty-badge">8</span></td>
+                                    <td class="num">$64.000</td>
+                                    <td class="num profit-cell">$22.400</td>
+                                </tr>
+                                <tr>
+                                    <td class="prod"><span class="prod-dot" style="background:var(--warn)"></span>
+                                        <div>
+                                            <div class="prod-name">Pastillas de freno delanteras</div>
+                                            <div class="prod-cat">Frenos</div>
+                                        </div>
+                                    </td>
+                                    <td class="num"><span class="qty-badge">5</span></td>
+                                    <td class="num">$125.000</td>
+                                    <td class="num profit-cell">$41.250</td>
+                                </tr>
+                                <tr>
+                                    <td class="prod"><span class="prod-dot" style="background:var(--accent)"></span>
+                                        <div>
+                                            <div class="prod-name">Bujía de encendido NGK</div>
+                                            <div class="prod-cat">Encendido</div>
+                                        </div>
+                                    </td>
+                                    <td class="num"><span class="qty-badge">20</span></td>
+                                    <td class="num">$70.000</td>
+                                    <td class="num profit-cell">$24.000</td>
+                                </tr>
+                                <tr>
+                                    <td class="prod"><span class="prod-dot" style="background:var(--danger)"></span>
+                                        <div>
+                                            <div class="prod-name">Correa de distribución</div>
+                                            <div class="prod-cat">Motor</div>
+                                        </div>
+                                    </td>
+                                    <td class="num"><span class="qty-badge">3</span></td>
+                                    <td class="num">$87.000</td>
+                                    <td class="num profit-cell">$26.100</td>
+                                </tr>
+                                <tr>
+                                    <td class="prod"><span class="prod-dot" style="background:var(--profit)"></span>
+                                        <div>
+                                            <div class="prod-name">Líquido refrigerante 1L</div>
+                                            <div class="prod-cat">Fluidos</div>
+                                        </div>
+                                    </td>
+                                    <td class="num"><span class="qty-badge">9</span></td>
+                                    <td class="num">$44.500</td>
+                                    <td class="num profit-cell">$16.020</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: quick actions + stock crítico + cierre -->
+            <div class="col">
+                <div class="panel" style="padding-bottom:14px;">
+                    <div class="panel-head">
+                        <div class="panel-title">Acción rápida</div>
+                    </div>
+                    <div class="quick-actions">
+                        <div class="qa-item qa-sale">
+                            <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                                    <path d="M6 10h4M6 14h2" />
+                                </svg></div>
+                            <div class="qa-text">
+                                <div class="t">Registrar venta</div>
+                                <div class="d">Abrir punto de venta</div>
+                            </div>
+                        </div>
+                        <div class="qa-item qa-stock">
+                            <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M3 7l9-4 9 4-9 4-9-4z" />
+                                    <path d="M3 7v10l9 4 9-4V7" />
+                                </svg></div>
+                            <div class="qa-text">
+                                <div class="t">Ajustar inventario</div>
+                                <div class="d">Editar stock de productos</div>
+                            </div>
+                        </div>
+                        <div class="qa-item qa-close">
+                            <div class="qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M20.5 11.5a8.5 8.5 0 1 1-3.3-6.7" />
+                                    <path d="M21 4v5h-5" />
+                                </svg></div>
+                            <div class="qa-text">
+                                <div class="t">Cerrar caja del día</div>
+                                <div class="d">Genera y envía el resumen</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel" style="flex-shrink:0; padding-bottom:6px;">
+                    <div class="panel-head">
+                        <div class="panel-title">Stock crítico <span class="count">· 4 productos</span></div>
+                        <div class="panel-link">Ver todo</div>
+                    </div>
+                    <div>
+                        <div class="stock-item">
+                            <div>
+                                <div class="stock-name">Correa de distribución</div>
+                                <div class="stock-left-label">Motor</div>
+                            </div>
+                            <span class="stock-pill critical">2 UND.</span>
+                        </div>
+                        <div class="stock-item">
+                            <div>
+                                <div class="stock-name">Pastillas de freno del.</div>
+                                <div class="stock-left-label">Frenos</div>
+                            </div>
+                            <span class="stock-pill critical">3 UND.</span>
+                        </div>
+                        <div class="stock-item">
+                            <div>
+                                <div class="stock-name">Filtro de aceite</div>
+                                <div class="stock-left-label">Lubricantes</div>
+                            </div>
+                            <span class="stock-pill low">6 UND.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="closing-panel">
+                    <div class="closing-head">
+                        <span class="dot"></span>
+                        <span class="t">Cierre automático · WhatsApp</span>
+                    </div>
+                    <div class="closing-desc">Al finalizar la jornada se enviará un resumen a WhatsApp con respaldo por
+                        Gmail.</div>
+                    <div class="closing-row"><span>Total del día</span><span class="val">$486.500</span></div>
+                    <div class="closing-row"><span>Ganancia neta</span><span class="val"
+                            style="color:var(--profit)">$168.900</span></div>
+                    <div class="closing-row"><span>Alertas de stock</span><span class="val" style="color:var(--warn)">4
+                            productos</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>

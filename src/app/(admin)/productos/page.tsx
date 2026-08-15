@@ -1,29 +1,34 @@
 /**
- * Página de Productos — Módulo 1: CRUD de Catálogo e Inventario.
+ * Página de Productos — Módulo 1: Catálogo e Inventario.
  *
- * Lista de productos con acciones de crear, editar, eliminar
- * y gestión de stock.
+ * Conectada directamente a la tabla `public.productos` en Supabase.
  */
-import { DataTable } from '@/components/admin';
+import { createClient } from '@/lib/supabase/server';
+import { ProductCatalog } from '@/components/admin';
+import type { Producto } from '@/types/database';
 
 export const metadata = {
-  title: 'Productos | MiVentApp',
-  description: 'Gestión de catálogo e inventario de productos',
+  title: 'Catálogo de Productos | MiVentApp',
+  description: 'Gestión de catálogo, precios y control de inventario en tiempo real',
 };
 
-export default function ProductosPage() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          Productos
-        </h1>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
-          + Nuevo Producto
-        </button>
-      </div>
+// Revalidar cada petición para mantener datos frescos
+export const dynamic = 'force-dynamic';
 
-      <DataTable />
-    </div>
-  );
+export default async function ProductosPage() {
+  const supabase = await createClient();
+
+  // Consultar todos los productos ordenados alfabéticamente
+  const { data, error } = await supabase
+    .from('productos')
+    .select('*')
+    .order('nombre', { ascending: true });
+
+  if (error) {
+    console.error('Error al cargar productos desde Supabase:', error.message);
+  }
+
+  const productos: Producto[] = data ?? [];
+
+  return <ProductCatalog initialProductos={productos} />;
 }
