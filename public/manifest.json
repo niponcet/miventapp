@@ -1,13 +1,24 @@
 {
-  "name": "MiVentApp",
+  "name": "MiVentApp — Punto de Venta & ERP",
   "short_name": "MiVentApp",
-  "description": "Sistema ERP de ventas, inventario y analítica para tu negocio",
-  "start_url": "/",
+  "description": "Sistema de punto de venta en terreno, catálogo y control de inventario en tiempo real",
+  "start_url": "/ventapp",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#6366f1",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#0F1419",
+  "theme_color": "#0F1419",
   "orientation": "portrait-primary",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["business", "finance", "productivity", "utilities"],
   "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
@@ -19,6 +30,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nueva Venta",
+      "short_name": "Venta",
+      "description": "Abrir terminal de venta en terreno",
+      "url": "/ventapp",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Inventario",
+      "short_name": "Inventario",
+      "description": "Consultar stock y productos",
+      "url": "/ventapp/inventario",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Analítica",
+      "short_name": "Analítica",
+      "description": "Ver resumen y ganancias del día",
+      "url": "/ventapp/analitica",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "any" }]
     }
   ]
 }

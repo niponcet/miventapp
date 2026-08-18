@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MiVentAPP — Mobile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0F1419;
+            --surface: #1A2129;
+            --surface-2: #212A34;
+            --surface-3: #262F3A;
+            --border: #2A333D;
+            --border-soft: #232B34;
+            --text: #E7EBEF;
+            --text-dim: #8B95A3;
+            --text-faint: #5B6472;
+            --accent: #5B8DEF;
+            --accent-soft: rgba(91, 141, 239, 0.14);
+            --profit: #4F9E82;
+            --profit-soft: rgba(79, 158, 130, 0.14);
+            --warn: #D98B4F;
+            --warn-soft: rgba(217, 139, 79, 0.14);
+            --danger: #C0526B;
+            --danger-soft: rgba(192, 82, 107, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 56px 40px;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stage {
+            display: flex;
+            gap: 56px;
+            align-items: flex-start;
+        }
+
+        .frame-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .frame-label {
+            font-family: 'Space Grotesk';
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 0.01em;
+        }
+
+        /* ---------- PHONE FRAME ---------- */
+        .phone {
+            width: 340px;
+            height: 718px;
+            background: #06090C;
+            border-radius: 46px;
+            padding: 10px;
+            box-shadow: 0 0 0 1px #1c232b, 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 38px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notch {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 22px;
+            background: #06090C;
+            border-radius: 14px;
+            z-index: 30;
+        }
+
+        .statusbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 26px 4px;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* ============ SCREEN: HOME / VENTA (light, high-contrast) ============ */
+        .screen-light {
+            background: #FFFFFF;
+            color: #0A0A0A;
+        }
+
+        .screen-light .statusbar {
+            color: #0A0A0A;
+        }
+
+        .home-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 20px 14px;
+            flex-shrink: 0;
+        }
+
+        .home-title {
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 19px;
+            color: #0A0A0A;
+        }
+
+        .bell-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 2px solid #0A0A0A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .bell-btn svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .bell-dot {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: 2px solid #FFFFFF;
+        }
+
+        .search-row {
+            padding: 0 20px 14px;
+            flex-shrink: 0;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid #0A0A0A;
+            border-radius: 16px;
+            padding: 12px 14px;
+        }
+
+        .search-box svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .search-box span {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: #3A3A3A;
+        }
+
+        .home-body {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .qa-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .qa-chip {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 2px solid #0A0A0A;
+            border-radius: 14px;
+            padding: 13px 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0A0A0A;
+            background: #FFFFFF;
+        }
+
+        .qa-chip svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .qa-chip-fill {
+            background: #0A0A0A;
+            color: #FFFFFF;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #8A8A8A;
+            margin-bottom: 10px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .p-card {
+            border: 2px solid #0A0A0A;
+            border-radius: 16px;
+            padding: 12px 11px 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .p-swatch {
+            width: 100%;
+            height: 44px;
+            border-radius: 10px;
+            background: #0A0A0A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .p-swatch svg {
+            width: 20px;
+            height: 20px;
+            stroke: #FFFFFF;
+        }
+
+        .p-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0A0A0A;
+            line-height: 1.2;
+        }
+
+        .p-price {
+            font-family: 'JetBrains Mono';
+            font-size: 14px;
+            font-weight: 700;
+            color: #0A0A0A;
+        }
+
+        /* ============ SCREEN: DARK (Inventario / Analítica) ============ */
+        .screen-dark {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .screen-dark .statusbar {
+            color: var(--text);
+        }
+
+        .dk-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 20px 14px;
+            flex-shrink: 0;
+        }
+
+        .dk-title {
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 19px;
+        }
+
+        .dk-sub {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 2px;
+        }
+
+        .bell-btn-dark {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            color: var(--text-dim);
+        }
+
+        .bell-btn-dark svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .bell-dot-dark {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: 2px solid var(--bg);
+        }
+
+        .dk-body {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            padding: 0 18px 18px;
+        }
+
+        /* Inventario list */
+        .dk-search {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 11px 13px;
+            margin-bottom: 12px;
+        }
+
+        .dk-search svg {
+            width: 16px;
+            height: 16px;
+            color: var(--text-faint);
+        }
+
+        .dk-search span {
+            font-size: 13px;
+            color: var(--text-faint);
+            font-weight: 500;
+        }
+
+        .inv-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: 14px;
+            padding: 11px 12px;
+            margin-bottom: 10px;
+        }
+
+        .inv-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--surface-3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--text-dim);
+        }
+
+        .inv-icon svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .inv-mid {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .inv-name {
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        .inv-cat {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-top: 1px;
+        }
+
+        .inv-right {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .inv-price {
+            font-family: 'JetBrains Mono';
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stock-tag {
+            font-family: 'JetBrains Mono';
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .stock-tag.critical {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .stock-tag.low {
+            background: var(--warn-soft);
+            color: var(--warn);
+        }
+
+        .stock-tag.ok {
+            background: var(--profit-soft);
+            color: var(--profit);
+        }
+
+        /* Analítica */
+        .date-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 14px;
+            width: fit-content;
+        }
+
+        .date-chip svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .an-kpi-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .an-kpi {
+            background: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: 16px;
+            padding: 14px 14px 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .an-kpi::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+        }
+
+        .an-kpi.k-accent::before {
+            background: var(--accent);
+        }
+
+        .an-kpi.k-profit::before {
+            background: var(--profit);
+        }
+
+        .an-kpi.k-warn::before {
+            background: var(--warn);
+        }
+
+        .an-kpi-label {
+            font-size: 10.5px;
+            color: var(--text-faint);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .an-kpi-value {
+            font-family: 'JetBrains Mono';
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .an-list-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .an-list-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .an-list-title .c {
+            color: var(--text-faint);
+            font-weight: 500;
+            font-size: 11px;
+        }
+
+        .an-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .an-row:last-child {
+            border-bottom: none;
+        }
+
+        .an-row-name {
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+
+        .an-row-sub {
+            font-size: 10.5px;
+            color: var(--text-faint);
+            margin-top: 1px;
+        }
+
+        .an-row-val {
+            font-family: 'JetBrains Mono';
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--profit);
+        }
+
+        /* ---------- FLOATING PILL TAB BAR ---------- */
+        .tabbar-wrap {
+            position: absolute;
+            bottom: 16px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 25;
+            pointer-events: none;
+        }
+
+        .tabbar {
+            pointer-events: all;
+            display: flex;
+            gap: 2px;
+            background: rgba(15, 20, 25, 0.94);
+            border: 1px solid #2A333D;
+            border-radius: 999px;
+            padding: 4px;
+        }
+
+        .tab-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 13px;
+            border-radius: 999px;
+            color: #8B95A3;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .tab-item svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .tab-item.active {
+            background: var(--accent);
+            color: #06121F;
+        }
+
+        /* on light screen, keep tabbar dark for contrast against white content */
+    </style>
+</head>
+
+<body>
+
+    <div class="stage">
+
+        <!-- =========================================================
+       FRAME 1 — HOME / VENTA (high contrast, foco en terreno)
+       ========================================================= -->
+        <div class="frame-col">
+            <div class="frame-label">Inicio · venta</div>
+            <div class="phone">
+                <div class="screen screen-light">
+                    <div class="notch"></div>
+                    <div class="statusbar">
+                        <span>9:41</span>
+                        <span>●●●●&nbsp; 5G&nbsp; 100%</span>
+                    </div>
+
+                    <div class="home-header">
+                        <div class="home-title">Nueva venta</div>
+                        <div class="bell-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="2.4">
+                                <path d="M17 8.5a5 5 0 1 0-9.8 1.5L3 21l6.5-2a5 5 0 0 0 7.5-4.5" />
+                            </svg>
+                            <div class="bell-dot"></div>
+                        </div>
+                    </div>
+
+                    <div class="search-row">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="2.6">
+                                <circle cx="11" cy="11" r="7" />
+                                <path d="M21 21l-4.3-4.3" />
+                            </svg>
+                            <span>Buscar producto</span>
+                        </div>
+                    </div>
+
+                    <div class="home-body">
+                        <div class="qa-row">
+                            <div class="qa-chip qa-chip-fill">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6">
+                                    <path d="M12 5v14M5 12h14" />
+                                </svg>
+                                Cobrar
+                            </div>
+                            <div class="qa-chip">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" stroke-width="2.4">
+                                    <rect x="3" y="7" width="18" height="13" rx="2" />
+                                    <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                </svg>
+                                Historial
+                            </div>
+                        </div>
+
+                        <div class="section-label">Productos</div>
+                        <div class="product-grid">
+                            <div class="p-card">
+                                <div class="p-swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M3 7l3-4h12l3 4" />
+                                        <path d="M3 7h18v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z" />
+                                    </svg></div>
+                                <div class="p-name">Aceite 20W-50</div>
+                                <div class="p-price">$8.000</div>
+                            </div>
+                            <div class="p-card">
+                                <div class="p-swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg></div>
+                                <div class="p-name">Filtro de aire</div>
+                                <div class="p-price">$8.000</div>
+                            </div>
+                            <div class="p-card">
+                                <div class="p-swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="4" y="6" width="16" height="12" rx="2" />
+                                        <path d="M8 6V4h8v2" />
+                                    </svg></div>
+                                <div class="p-name">Pastillas freno</div>
+                                <div class="p-price">$25.000</div>
+                            </div>
+                            <div class="p-card">
+                                <div class="p-swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2" />
+                                    </svg></div>
+                                <div class="p-name">Bujía NGK</div>
+                                <div class="p-price">$3.500</div>
+                            </div>
+                            <div class="p-card">
+                                <div class="p-swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M4 4h16v4H4zM4 12h16v4H4zM4 20h10" />
+                                    </svg></div>
+                                <div class="p-name">Correa distrib.</div>
+                                <div class="p-price">$87.000</div>
+                            </div>
+                            <div class="p-card">
+                                <div class="p-swatch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" />
+                                        <circle cx="12" cy="9" r="2.4" />
+                                    </svg></div>
+                                <div class="p-name">Refrigerante 1L</div>
+                                <div class="p-price">$44.500</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabbar-wrap">
+                        <div class="tabbar">
+                            <div class="tab-item active">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <circle cx="9" cy="20" r="1.4" />
+                                    <circle cx="17" cy="20" r="1.4" />
+                                    <path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6" />
+                                </svg>
+                                Venta
+                            </div>
+                            <div class="tab-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <path d="M3 7l9-4 9 4-9 4-9-4z" />
+                                    <path d="M3 7v10l9 4 9-4V7" />
+                                </svg>
+                                Inventario
+                            </div>
+                            <div class="tab-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                                    <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                                    <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                                    <rect x="3" y="16" width="7" height="5" rx="1.5" />
+                                </svg>
+                                Analítica
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================
+       FRAME 2 — INVENTARIO (dark, marca)
+       ========================================================= -->
+        <div class="frame-col">
+            <div class="frame-label">Inventario</div>
+            <div class="phone">
+                <div class="screen screen-dark">
+                    <div class="notch"></div>
+                    <div class="statusbar">
+                        <span>9:41</span>
+                        <span>●●●●&nbsp; 5G&nbsp; 100%</span>
+                    </div>
+
+                    <div class="dk-header">
+                        <div>
+                            <div class="dk-title">Inventario</div>
+                            <div class="dk-sub">42 productos activos</div>
+                        </div>
+                        <div class="bell-btn-dark">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path d="M17 8.5a5 5 0 1 0-9.8 1.5L3 21l6.5-2a5 5 0 0 0 7.5-4.5" />
+                            </svg>
+                            <div class="bell-dot-dark"></div>
+                        </div>
+                    </div>
+
+                    <div class="dk-body">
+                        <div class="dk-search">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <circle cx="11" cy="11" r="7" />
+                                <path d="M21 21l-4.3-4.3" />
+                            </svg>
+                            <span>Buscar en inventario</span>
+                        </div>
+
+                        <div class="inv-item">
+                            <div class="inv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2" />
+                                </svg></div>
+                            <div class="inv-mid">
+                                <div class="inv-name">Correa de distribución</div>
+                                <div class="inv-cat">Motor</div>
+                            </div>
+                            <div class="inv-right">
+                                <div class="inv-price">$87.000</div>
+                                <span class="stock-tag critical">2 und.</span>
+                            </div>
+                        </div>
+
+                        <div class="inv-item">
+                            <div class="inv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="4" y="6" width="16" height="12" rx="2" />
+                                    <path d="M8 6V4h8v2" />
+                                </svg></div>
+                            <div class="inv-mid">
+                                <div class="inv-name">Pastillas freno delantero</div>
+                                <div class="inv-cat">Frenos</div>
+                            </div>
+                            <div class="inv-right">
+                                <div class="inv-price">$25.000</div>
+                                <span class="stock-tag critical">3 und.</span>
+                            </div>
+                        </div>
+
+                        <div class="inv-item">
+                            <div class="inv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M3 7l3-4h12l3 4" />
+                                    <path d="M3 7h18v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7z" />
+                                </svg></div>
+                            <div class="inv-mid">
+                                <div class="inv-name">Filtro de aceite</div>
+                                <div class="inv-cat">Lubricantes</div>
+                            </div>
+                            <div class="inv-right">
+                                <div class="inv-price">$8.000</div>
+                                <span class="stock-tag low">6 und.</span>
+                            </div>
+                        </div>
+
+                        <div class="inv-item">
+                            <div class="inv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg></div>
+                            <div class="inv-mid">
+                                <div class="inv-name">Filtro de aire universal</div>
+                                <div class="inv-cat">Repuestos</div>
+                            </div>
+                            <div class="inv-right">
+                                <div class="inv-price">$8.000</div>
+                                <span class="stock-tag ok">18 und.</span>
+                            </div>
+                        </div>
+
+                        <div class="inv-item">
+                            <div class="inv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2" />
+                                </svg></div>
+                            <div class="inv-mid">
+                                <div class="inv-name">Bujía de encendido NGK</div>
+                                <div class="inv-cat">Encendido</div>
+                            </div>
+                            <div class="inv-right">
+                                <div class="inv-price">$3.500</div>
+                                <span class="stock-tag ok">24 und.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabbar-wrap">
+                        <div class="tabbar">
+                            <div class="tab-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <circle cx="9" cy="20" r="1.4" />
+                                    <circle cx="17" cy="20" r="1.4" />
+                                    <path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6" />
+                                </svg>
+                                Venta
+                            </div>
+                            <div class="tab-item active">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <path d="M3 7l9-4 9 4-9 4-9-4z" />
+                                    <path d="M3 7v10l9 4 9-4V7" />
+                                </svg>
+                                Inventario
+                            </div>
+                            <div class="tab-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                                    <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                                    <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                                    <rect x="3" y="16" width="7" height="5" rx="1.5" />
+                                </svg>
+                                Analítica
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================
+       FRAME 3 — ANALÍTICA (dark, tipo dashboard)
+       ========================================================= -->
+        <div class="frame-col">
+            <div class="frame-label">Analítica</div>
+            <div class="phone">
+                <div class="screen screen-dark">
+                    <div class="notch"></div>
+                    <div class="statusbar">
+                        <span>9:41</span>
+                        <span>●●●●&nbsp; 5G&nbsp; 100%</span>
+                    </div>
+
+                    <div class="dk-header">
+                        <div>
+                            <div class="dk-title">Analítica</div>
+                            <div class="dk-sub">Desempeño de la jornada</div>
+                        </div>
+                        <div class="bell-btn-dark">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path d="M17 8.5a5 5 0 1 0-9.8 1.5L3 21l6.5-2a5 5 0 0 0 7.5-4.5" />
+                            </svg>
+                            <div class="bell-dot-dark"></div>
+                        </div>
+                    </div>
+
+                    <div class="dk-body">
+                        <div class="date-chip">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <path d="M16 2v4M8 2v4M3 10h18" />
+                            </svg>
+                            14 ago 2026
+                        </div>
+
+                        <div class="an-kpi-grid">
+                            <div class="an-kpi k-accent">
+                                <div class="an-kpi-label">Total vendido</div>
+                                <div class="an-kpi-value">$486.500</div>
+                            </div>
+                            <div class="an-kpi k-profit">
+                                <div class="an-kpi-label">Ganancia neta</div>
+                                <div class="an-kpi-value">$168.900</div>
+                            </div>
+                            <div class="an-kpi k-accent">
+                                <div class="an-kpi-label">Transacciones</div>
+                                <div class="an-kpi-value">37</div>
+                            </div>
+                            <div class="an-kpi k-warn">
+                                <div class="an-kpi-label">Stock crítico</div>
+                                <div class="an-kpi-value">4</div>
+                            </div>
+                        </div>
+
+                        <div class="an-list-head">
+                            <div class="an-list-title">Más vendidos <span class="c">· hoy</span></div>
+                        </div>
+                        <div class="an-row">
+                            <div>
+                                <div class="an-row-name">Bujía NGK</div>
+                                <div class="an-row-sub">20 und. vendidas</div>
+                            </div>
+                            <div class="an-row-val">+$24.000</div>
+                        </div>
+                        <div class="an-row">
+                            <div>
+                                <div class="an-row-name">Aceite 20W-50</div>
+                                <div class="an-row-sub">12 und. vendidas</div>
+                            </div>
+                            <div class="an-row-val">+$28.800</div>
+                        </div>
+                        <div class="an-row">
+                            <div>
+                                <div class="an-row-name">Filtro de aire</div>
+                                <div class="an-row-sub">8 und. vendidas</div>
+                            </div>
+                            <div class="an-row-val">+$22.400</div>
+                        </div>
+                    </div>
+
+                    <div class="tabbar-wrap">
+                        <div class="tabbar">
+                            <div class="tab-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <circle cx="9" cy="20" r="1.4" />
+                                    <circle cx="17" cy="20" r="1.4" />
+                                    <path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6" />
+                                </svg>
+                                Venta
+                            </div>
+                            <div class="tab-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <path d="M3 7l9-4 9 4-9 4-9-4z" />
+                                    <path d="M3 7v10l9 4 9-4V7" />
+                                </svg>
+                                Inventario
+                            </div>
+                            <div class="tab-item active">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                                    <rect x="3" y="3" width="7" height="9" rx="1.5" />
+                                    <rect x="14" y="3" width="7" height="5" rx="1.5" />
+                                    <rect x="14" y="12" width="7" height="9" rx="1.5" />
+                                    <rect x="3" y="16" width="7" height="5" rx="1.5" />
+                                </svg>
+                                Analítica
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
