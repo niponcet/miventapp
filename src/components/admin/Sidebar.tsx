@@ -1,14 +1,10 @@
-/**
- * Sidebar de navegación del panel de administración.
- *
- * Fiel al diseño de referencia: brand mark con gradiente,
- * navegación con iconos SVG inline, sección de utilidades
- * y footer con avatar del usuario.
- */
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { logoutAction } from '@/app/(auth)/actions';
 import styles from './Sidebar.module.css';
 
 interface NavItem {
@@ -54,7 +50,7 @@ const mainNavItems: NavItem[] = [
   },
   {
     href: '/ventapp',
-    label: 'Ventas',
+    label: 'Ventas (POS)',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
         <circle cx="9" cy="20" r="1.4" />
@@ -99,6 +95,36 @@ const utilNavItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [userName, setUserName] = useState<string>('Usuario');
+  const [userRole, setUserRole] = useState<string>('Administrador');
+  const [initials, setInitials] = useState<string>('MV');
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const metadata = user.user_metadata || {};
+        const name = metadata.nombre_completo || user.email?.split('@')[0] || 'Administrador';
+        const role = metadata.rol || 'Administrador';
+        setUserName(name);
+        setUserRole(role);
+
+        const parts = name.trim().split(' ');
+        if (parts.length >= 2) {
+          setInitials((parts[0][0] + parts[1][0]).toUpperCase());
+        } else if (parts[0]) {
+          setInitials(parts[0].slice(0, 2).toUpperCase());
+        }
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <aside className={styles.sidebar}>
@@ -136,11 +162,29 @@ export function Sidebar() {
 
       {/* User footer */}
       <div className={styles.footer}>
-        <div className={styles.avatar}>JP</div>
-        <div className={styles.userMeta}>
-          <div className={styles.userName}>Juan Pérez</div>
-          <div className={styles.userRole}>Administrador</div>
+        <div className={styles.userInfo}>
+          <div className={styles.avatar}>{initials}</div>
+          <div className={styles.userMeta}>
+            <div className={styles.userName} title={userName}>
+              {userName}
+            </div>
+            <div className={styles.userRole}>{userRole}</div>
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => logoutAction()}
+          className={styles.logoutButton}
+          title="Cerrar sesión"
+          aria-label="Cerrar sesión"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
       </div>
     </aside>
   );
