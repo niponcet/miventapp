@@ -350,8 +350,9 @@
 }
 
 .qaSale .qaIcon  { background: var(--accent-soft); color: var(--accent); }
-.qaStock .qaIcon { background: var(--profit-soft); color: var(--profit); }
-.qaClose .qaIcon { background: var(--warn-soft);   color: var(--warn); }
+.qaProduct .qaIcon { background: var(--profit-soft); color: var(--profit); }
+.qaStock .qaIcon { background: var(--warn-soft); color: var(--warn); }
+.qaClose .qaIcon { background: var(--danger-soft);   color: var(--danger); }
 
 .qaTitle {
   font-size: 13px;

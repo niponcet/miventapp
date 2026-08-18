@@ -447,3 +447,235 @@
   gap: 10px;
   margin-top: 20px;
 }
+
+/* ─── Kebab Menu ─────────────────────────────────────────────────────────────── */
+
+.thAction {
+  width: 36px;
+  padding: 0 !important;
+}
+
+.kebabCell {
+  width: 36px;
+  padding: 6px 4px 6px 10px !important;
+  vertical-align: middle;
+}
+
+.kebabWrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.kebabBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.kebabBtn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border-soft);
+}
+
+.kebabBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.kebabMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 150px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  z-index: 20;
+  padding: 4px;
+  animation: menuFadeIn 0.12s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kebabMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.kebabMenuItem:hover {
+  background: var(--danger-soft);
+}
+
+.kebabMenuItemEdit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.kebabMenuItemEdit:hover {
+  background: var(--surface-3);
+}
+
+.kebabMenuItemEdit svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.kebabDivider {
+  height: 1px;
+  background: var(--border-soft);
+  margin: 3px 6px;
+}
+
+.kebabMenuItem svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* ─── Confirmation Modal ─────────────────────────────────────────────────────── */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+  padding: 16px;
+}
+
+.confirmModal {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 24px 22px;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  animation: modalScaleIn 0.15s ease-out;
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.confirmIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  margin-bottom: 14px;
+}
+
+.confirmIcon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.confirmTitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.confirmText {
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.confirmText strong {
+  color: var(--text);
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btnDanger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+
+.btnDanger:hover {
+  filter: brightness(1.15);
+}
+
+.btnDanger:disabled,
+.btnSecondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useTransition } from 'react';
+import { useState, useMemo, useTransition, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import type { Producto } from '@/types/database';
 import { createClient } from '@/lib/supabase/client';
 import styles from './ProductCatalog.module.css';
@@ -17,6 +18,24 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
   const [isPending, startTransition] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Kebab menu & delete confirmation
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Producto | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Editar producto
+  const [editTarget, setEditTarget] = useState<Producto | null>(null);
+  const [editData, setEditData] = useState({
+    nombre: '',
+    descripcion: '',
+    precio_neto: '',
+    precio_venta: '',
+    stock_actual: '',
+    stock_minimo: '',
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+
   // Formulario nuevo producto
   const [formData, setFormData] = useState({
     nombre: '',
@@ -28,6 +47,17 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
   });
 
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Auto-abrir modal si llega con ?crear=true (ej: desde el dashboard)
+  useEffect(() => {
+    if (searchParams.get('crear') === 'true') {
+      setIsModalOpen(true);
+      // Limpiar el parámetro de la URL sin recargar
+      router.replace('/productos', { scroll: false });
+    }
+  }, [searchParams, router]);
 
   // Función para refrescar productos desde Supabase
   const refreshProducts = async () => {
@@ -42,6 +72,85 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
       }
     });
   };
+
+  // Cerrar menú kebab al hacer click fuera
+  useEffect(() => {
+    if (!openMenuId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openMenuId]);
+
+  // Eliminar producto
+  const handleDeleteProduct = useCallback(async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('productos')
+        .delete()
+        .eq('id', deleteTarget.id);
+
+      if (error) {
+        alert('Error al eliminar el producto: ' + error.message);
+      } else {
+        setProductos((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      }
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
+  }, [deleteTarget, supabase]);
+
+  // Abrir modal de edición
+  const openEditModal = useCallback((p: Producto) => {
+    setEditTarget(p);
+    setEditData({
+      nombre: p.nombre,
+      descripcion: p.descripcion || '',
+      precio_neto: String(p.precio_neto),
+      precio_venta: String(p.precio_venta),
+      stock_actual: String(p.stock_actual),
+      stock_minimo: String(p.stock_minimo),
+    });
+  }, []);
+
+  // Actualizar producto
+  const handleUpdateProduct = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTarget || !editData.nombre.trim()) return;
+    setIsUpdating(true);
+    try {
+      const { data, error } = await supabase
+        .from('productos')
+        .update({
+          nombre: editData.nombre.trim(),
+          descripcion: editData.descripcion.trim() || null,
+          precio_neto: parseInt(editData.precio_neto) || 0,
+          precio_venta: parseInt(editData.precio_venta) || 0,
+          stock_actual: parseInt(editData.stock_actual) || 0,
+          stock_minimo: parseInt(editData.stock_minimo) || 5,
+        })
+        .eq('id', editTarget.id)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Error al actualizar el producto: ' + error.message);
+      } else if (data) {
+        setProductos((prev) =>
+          prev.map((p) => (p.id === data.id ? data : p)).sort((a, b) => a.nombre.localeCompare(b.nombre))
+        );
+        setEditTarget(null);
+      }
+    } finally {
+      setIsUpdating(false);
+    }
+  }, [editTarget, editData, supabase]);
 
   // Guardar nuevo producto
   const handleCreateProduct = async (e: React.FormEvent) => {
@@ -172,7 +281,7 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>
               <path d="M12 5v14M5 12h14" />
             </svg>
-            + Nuevo Producto
+            Nuevo Producto
           </button>
         </div>
       </div>
@@ -310,6 +419,7 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
             <table className={styles.ledgerTable}>
               <thead>
                 <tr>
+                  <th className={styles.thAction}></th>
                   <th>Producto</th>
                   <th className={styles.num}>Stock Actual</th>
                   <th className={styles.num}>Mínimo</th>
@@ -326,21 +436,64 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
                   const valorFila = p.precio_venta * p.stock_actual;
 
                   let stockStyle = styles.stockNormal;
-                  let dotColor = 'var(--profit)';
 
                   if (p.stock_actual <= p.stock_minimo) {
                     stockStyle = styles.stockCritical;
-                    dotColor = 'var(--danger)';
                   } else if (p.stock_actual <= p.stock_minimo * 2) {
                     stockStyle = styles.stockLow;
-                    dotColor = 'var(--warn)';
                   }
 
                   return (
                     <tr key={p.id}>
+                      <td className={styles.kebabCell}>
+                        <div className={styles.kebabWrapper} ref={openMenuId === p.id ? menuRef : undefined}>
+                          <button
+                            className={styles.kebabBtn}
+                            onClick={() => setOpenMenuId(openMenuId === p.id ? null : p.id)}
+                            aria-label="Opciones del producto"
+                          >
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                              <circle cx="12" cy="5" r="1.8" />
+                              <circle cx="12" cy="12" r="1.8" />
+                              <circle cx="12" cy="19" r="1.8" />
+                            </svg>
+                          </button>
+                          {openMenuId === p.id && (
+                            <div className={styles.kebabMenu}>
+                              <button
+                                className={styles.kebabMenuItemEdit}
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  openEditModal(p);
+                                }}
+                              >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                                Actualizar
+                              </button>
+                              <div className={styles.kebabDivider} />
+                              <button
+                                className={styles.kebabMenuItem}
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  setDeleteTarget(p);
+                                }}
+                              >
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                  <line x1="10" y1="11" x2="10" y2="17" />
+                                  <line x1="14" y1="11" x2="14" y2="17" />
+                                </svg>
+                                Eliminar
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td>
                         <div className={styles.prodCell}>
-                          <span className={styles.prodDot} style={{ background: dotColor }} />
                           <div>
                             <div className={styles.prodName}>{p.nombre}</div>
                             {p.descripcion && <div className={styles.prodDesc}>{p.descripcion}</div>}
@@ -491,6 +644,161 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL EDITAR PRODUCTO ─── */}
+      {editTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isUpdating) setEditTarget(null);
+          }}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-zinc-700 bg-zinc-900 p-6 shadow-2xl"
+            style={{ background: 'var(--surface)' }}
+          >
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
+              <h2 className="text-lg font-bold font-heading text-zinc-100">
+                Actualizar Producto
+              </h2>
+              <button
+                onClick={() => setEditTarget(null)}
+                className="text-zinc-400 hover:text-zinc-200"
+                disabled={isUpdating}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateProduct}>
+              <div className={styles.formGrid}>
+                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                  <label className={styles.formLabel}>Nombre del Producto *</label>
+                  <input
+                    type="text"
+                    required
+                    className={styles.formInput}
+                    value={editData.nombre}
+                    onChange={(e) => setEditData({ ...editData, nombre: e.target.value })}
+                  />
+                </div>
+
+                <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                  <label className={styles.formLabel}>Descripción</label>
+                  <input
+                    type="text"
+                    className={styles.formInput}
+                    value={editData.descripcion}
+                    onChange={(e) => setEditData({ ...editData, descripcion: e.target.value })}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Precio Neto / Costo ($ CLP)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={styles.formInput}
+                    value={editData.precio_neto}
+                    onChange={(e) => setEditData({ ...editData, precio_neto: e.target.value })}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Precio de Venta ($ CLP) *</label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    className={styles.formInput}
+                    value={editData.precio_venta}
+                    onChange={(e) => setEditData({ ...editData, precio_venta: e.target.value })}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Stock Actual (Unidades)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={styles.formInput}
+                    value={editData.stock_actual}
+                    onChange={(e) => setEditData({ ...editData, stock_actual: e.target.value })}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Stock Mínimo (Alerta)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className={styles.formInput}
+                    value={editData.stock_minimo}
+                    onChange={(e) => setEditData({ ...editData, stock_minimo: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  onClick={() => setEditTarget(null)}
+                  className={styles.btnSecondary}
+                  disabled={isUpdating}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className={styles.btnPrimary}
+                >
+                  {isUpdating ? 'Actualizando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL CONFIRMAR ELIMINACIÓN ─── */}
+      {deleteTarget && (
+        <div
+          className={styles.modalOverlay}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isDeleting) setDeleteTarget(null);
+          }}
+        >
+          <div className={styles.confirmModal}>
+            <div className={styles.confirmIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <path d="M12 9v4M12 17h.01" />
+              </svg>
+            </div>
+            <h3 className={styles.confirmTitle}>¿Eliminar producto?</h3>
+            <p className={styles.confirmText}>
+              Estás a punto de eliminar <strong>{deleteTarget.nombre}</strong>. Esta acción no se puede deshacer.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => setDeleteTarget(null)}
+                disabled={isDeleting}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.btnDanger}
+                onClick={handleDeleteProduct}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
           </div>
         </div>
       )}
