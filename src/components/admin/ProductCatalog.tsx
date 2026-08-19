@@ -62,10 +62,12 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
   // Función para refrescar productos desde Supabase
   const refreshProducts = async () => {
     startTransition(async () => {
-      const { data } = await supabase
-        .from('productos')
-        .select('*')
-        .order('nombre', { ascending: true });
+      const { data: { session } } = await supabase.auth.getSession();
+      let query = supabase.from('productos').select('*').order('nombre', { ascending: true });
+      if (session?.user?.id) {
+        query = query.eq('user_id', session.user.id);
+      }
+      const { data } = await query;
 
       if (data) {
         setProductos(data);

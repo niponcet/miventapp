@@ -27,9 +27,12 @@ export function CierreCajaView({
   const margen = totalVentas > 0 ? ((gananciaNeta / totalVentas) * 100).toFixed(1) : '0';
   const todayFormatted = formatDateFull(new Date());
 
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
+
   const handleEjecutarCierre = async () => {
     setIsClosing(true);
     setFeedback(null);
+    setWhatsappUrl(null);
 
     try {
       const res = await fetch('/api/cierre-jornada', {
@@ -46,9 +49,13 @@ export function CierreCajaView({
         setCierres((prev) => [json.data, ...prev.filter((c) => c.id !== json.data.id)]);
       }
 
+      if (json.whatsappUrl) {
+        setWhatsappUrl(json.whatsappUrl);
+      }
+
       setFeedback({
         type: 'success',
-        message: '¡Cierre de jornada generado y registrado con éxito! Respaldo procesado.',
+        message: '¡Cierre de jornada generado y registrado con éxito en Supabase!',
       });
     } catch (err: any) {
       setFeedback({
@@ -98,16 +105,28 @@ export function CierreCajaView({
       {/* Feedback message */}
       {feedback && (
         <div
-          className={`p-4 rounded-xl border text-sm font-medium flex items-center justify-between ${
+          className={`p-4 rounded-xl border text-sm font-medium flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
             feedback.type === 'success'
               ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
               : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
           }`}
         >
           <span>{feedback.message}</span>
-          <button onClick={() => setFeedback(null)} className="text-current opacity-70 hover:opacity-100">
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {feedback.type === 'success' && whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 bg-[#25D366] hover:bg-[#20bd5a] text-white font-semibold text-xs rounded-lg transition shadow flex items-center gap-1.5"
+              >
+                📲 Enviar por WhatsApp
+              </a>
+            )}
+            <button onClick={() => setFeedback(null)} className="text-current opacity-70 hover:opacity-100">
+              ✕
+            </button>
+          </div>
         </div>
       )}
 

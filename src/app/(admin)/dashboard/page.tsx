@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import styles from './dashboard.module.css';
-import { formatCLP, getProductCategory, formatDateFull, formatDateChip } from '@/components/ventapp/productUtils';
+import { formatCLP, getProductCategory, formatDateFull, getProductIcon } from '@/components/ventapp/productUtils';
+import { DatePicker, CloseRegisterButton } from '@/components/admin';
 
 export const metadata = {
   title: 'Analítica | MiVentApp',
@@ -11,40 +12,73 @@ export const metadata = {
 // Revalidar en cada petición para reflejar ventas de inmediato
 export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{ date?: string }>;
+}
+
+export default async function DashboardPage(props: DashboardPageProps) {
+  const searchParams = await props.searchParams;
+  const selectedDate = searchParams.date || new Date().toISOString().split('T')[0];
   const supabase = await createClient();
 
-  // 1. Consultar ventas y métricas
-  const { data: ventasData } = await supabase
+  // Límites del día seleccionado
+  const startOfDay = `${selectedDate}T00:00:00.000Z`;
+  const endOfDay = `${selectedDate}T23:59:59.999Z`;
+
+  // Obtener usuario autenticado para respetar el aislamiento Multi-tenant
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // 1. Consultar ventas y métricas del día seleccionado
+  let ventasQuery = supabase
     .from('ventas')
     .select('id, total_venta, ganancia_neta, fecha_hora')
+    .gte('fecha_hora', startOfDay)
+    .lte('fecha_hora', endOfDay)
     .order('fecha_hora', { ascending: false });
 
+  if (user?.id) {
+    ventasQuery = ventasQuery.eq('user_id', user.id);
+  }
+  const { data: ventasData } = await ventasQuery;
+
   // 2. Consultar productos para stock crítico
-  const { data: productosData } = await supabase
+  let prodQuery = supabase
     .from('productos')
     .select('*')
     .order('nombre', { ascending: true });
 
-  // 3. Consultar detalle de ventas para la tabla de productos vendidos
-  const { data: detalleData } = await supabase
-    .from('detalle_ventas')
-    .select(`
-      cantidad,
-      precio_unitario_venta,
-      precio_unitario_neto,
-      producto_id,
-      productos (
-        nombre,
-        descripcion
-      )
-    `);
+  if (user?.id) {
+    prodQuery = prodQuery.eq('user_id', user.id);
+  }
+  const { data: productosData } = await prodQuery;
 
   const ventas = ventasData ?? [];
   const productos = productosData ?? [];
+  const ventaIds = ventas.map((v) => v.id);
+
+  // 3. Consultar detalle de ventas correspondiente a las ventas del día seleccionado
+  const { data: detalleData } = ventaIds.length > 0
+    ? await supabase
+        .from('detalle_ventas')
+        .select(`
+          cantidad,
+          precio_unitario_venta,
+          precio_unitario_neto,
+          producto_id,
+          venta_id,
+          productos (
+            nombre,
+            descripcion
+          )
+        `)
+        .in('venta_id', ventaIds)
+    : { data: [] };
+
   const detalles = detalleData ?? [];
 
-  // Calcular KPIs
+  // Calcular KPIs del día seleccionado
   const totalVendido = ventas.reduce((sum, v) => sum + (v.total_venta || 0), 0);
   const gananciaNeta = ventas.reduce((sum, v) => sum + (v.ganancia_neta || 0), 0);
   const transacciones = ventas.length;
@@ -68,7 +102,7 @@ export default async function DashboardPage() {
 
   const dotColors = ['var(--accent)', 'var(--profit)', 'var(--warn)', 'var(--danger)'];
 
-  detalles.forEach((d, idx) => {
+  detalles.forEach((d) => {
     const prodInfo = (d as any).productos;
     const nombre = prodInfo?.nombre || 'Producto';
     const categoria = getProductCategory(nombre, prodInfo?.descripcion);
@@ -96,8 +130,8 @@ export default async function DashboardPage() {
     (a, b) => b.cantidad - a.cantidad
   );
 
-  const today = new Date();
-  const dateFormatted = formatDateFull(today);
+  const selectedDateObj = new Date(selectedDate + 'T12:00:00');
+  const dateFormatted = formatDateFull(selectedDateObj);
 
   const kpis = [
     {
@@ -159,13 +193,9 @@ export default async function DashboardPage() {
           <div className={styles.dateLine}>Jornada del {dateFormatted}</div>
         </div>
         <div className={styles.topbarActions}>
-          <div className={styles.datepicker}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <rect x="3" y="4" width="18" height="18" rx="2" />
-              <path d="M16 2v4M8 2v4M3 10h18" />
-            </svg>
-            {formatDateChip(today)}
-          </div>
+          {/* Selector de fecha interactivo (Módulo 3) */}
+          <DatePicker initialDate={selectedDate} />
+
           <Link href="/ventapp" className={styles.btnPrimary}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>
               <path d="M12 5v14M5 12h14" />
@@ -196,7 +226,7 @@ export default async function DashboardPage() {
           <div className={styles.panel}>
             <div className={styles.panelHead}>
               <div className={styles.panelTitle}>
-                Detalle de productos vendidos <span className={styles.panelCount}>· jornada actual</span>
+                Detalle de productos vendidos <span className={styles.panelCount}>· jornada {selectedDate}</span>
               </div>
               <Link href="/productos" className={styles.panelLink}>
                 Ver catálogo
@@ -210,7 +240,7 @@ export default async function DashboardPage() {
                     <circle cx="17" cy="20" r="1.4" />
                     <path d="M2 3h2l2.6 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 7H6" />
                   </svg>
-                  <p className="text-sm font-medium text-zinc-400">Aún no hay ventas registradas en esta jornada</p>
+                  <p className="text-sm font-medium text-zinc-400">Aún no hay ventas registradas en esta jornada ({selectedDate})</p>
                   <p className="text-xs text-zinc-600 mt-1">Usa la aplicación móvil o el botón &quot;Nueva venta&quot; para registrar ventas</p>
                   <Link
                     href="/ventapp"
@@ -286,18 +316,8 @@ export default async function DashboardPage() {
                   <div className={styles.qaDesc}>Gestionar precios y stock</div>
                 </div>
               </Link>
-              <Link href="/cierre" className={`${styles.qaItem} ${styles.qaClose}`}>
-                <div className={styles.qaIcon}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path d="M20.5 11.5a8.5 8.5 0 1 1-3.3-6.7" />
-                    <path d="M21 4v5h-5" />
-                  </svg>
-                </div>
-                <div>
-                  <div className={styles.qaTitle}>Cerrar caja del día</div>
-                  <div className={styles.qaDesc}>Genera y envía el resumen diario</div>
-                </div>
-              </Link>
+              {/* Cierre de caja modal interactivo con WhatsApp */}
+              <CloseRegisterButton date={selectedDate} />
             </div>
           </div>
 
@@ -334,7 +354,7 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Cierre automático con valores reales */}
+          {/* Cierre automático con valores reales de la fecha seleccionada */}
           <div className={styles.closingPanel}>
             <div className={styles.closingHead}>
               <span className={styles.closingDot} />
