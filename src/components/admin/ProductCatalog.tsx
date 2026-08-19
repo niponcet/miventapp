@@ -36,6 +36,9 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Modal de alerta de precio inválido
+  const [priceErrorModal, setPriceErrorModal] = useState<string | null>(null);
+
   // Formulario nuevo producto
   const [formData, setFormData] = useState({
     nombre: '',
@@ -175,7 +178,7 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
 
     const errorMsg = validatePrecios(editData);
     if (errorMsg) {
-      alert(errorMsg);
+      setPriceErrorModal(errorMsg);
       return;
     }
 
@@ -217,7 +220,7 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
 
     const errorMsg = validatePrecios(formData);
     if (errorMsg) {
-      alert(errorMsg);
+      setPriceErrorModal(errorMsg);
       return;
     }
 
@@ -898,6 +901,46 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
                 disabled={isDeleting}
               >
                 {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ─── MODAL ALERTA DE PRECIO INVÁLIDO ─── */}
+      {priceErrorModal && (
+        <div
+          className={styles.modalOverlay}
+          style={{ zIndex: 60 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPriceErrorModal(null);
+          }}
+        >
+          <div
+            className={styles.confirmModal}
+            style={{ maxWidth: '420px', border: '1px solid rgba(239, 68, 68, 0.4)' }}
+          >
+            <div
+              className={styles.confirmIcon}
+              style={{ background: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger)' }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </div>
+            <h3 className={styles.confirmTitle}>Precio no permitido</h3>
+            <p className={styles.confirmText} style={{ margin: '10px 0 22px', fontSize: '14px' }}>
+              {priceErrorModal}
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                onClick={() => setPriceErrorModal(null)}
+                style={{ width: '100%', justifyContent: 'center' }}
+                autoFocus
+              >
+                Entendido, corregir precio
               </button>
             </div>
           </div>
