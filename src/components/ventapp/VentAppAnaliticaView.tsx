@@ -36,9 +36,45 @@ export function VentAppAnaliticaView({
   historialVentas,
 }: VentAppAnaliticaViewProps) {
   const [expandedSaleId, setExpandedSaleId] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [cierreFeedback, setCierreFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+    whatsappUrl?: string;
+  } | null>(null);
 
   const toggleExpand = (id: string) => {
     setExpandedSaleId((prev) => (prev === id ? null : id));
+  };
+
+  const handleCerrarCaja = async () => {
+    setIsClosing(true);
+    setCierreFeedback(null);
+
+    try {
+      const res = await fetch('/api/cierre-jornada', {
+        method: 'POST',
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.error || 'Error al procesar el cierre de caja');
+      }
+
+      setCierreFeedback({
+        type: 'success',
+        message: '¡Cierre de jornada consolidado y guardado con éxito!',
+        whatsappUrl: json.whatsappUrl,
+      });
+    } catch (err: any) {
+      setCierreFeedback({
+        type: 'error',
+        message: err.message || 'Error al procesar cierre de caja',
+      });
+    } finally {
+      setIsClosing(false);
+    }
   };
 
   return (
@@ -72,14 +108,84 @@ export function VentAppAnaliticaView({
 
       {/* Body */}
       <div className="flex-1 px-5 pt-3.5 pb-6 min-h-0">
-        {/* Date Chip */}
-        <div className="flex items-center gap-[6px] bg-[#1A2129] border border-[#2A333D] rounded-[11px] px-[12px] py-[8px] text-[12px] font-semibold text-[#8B95A3] w-fit mb-[14px]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} className="w-[13px] h-[13px]">
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path d="M16 2v4M8 2v4M3 10h18" />
-          </svg>
-          {fechaFormateada}
+        {/* Date Chip & Cerrar Caja Row */}
+        <div className="flex items-center justify-between gap-2 mb-[14px]">
+          {/* Date Chip */}
+          <div className="flex items-center gap-[6px] bg-[#1A2129] border border-[#2A333D] rounded-[11px] px-[12px] py-[8px] text-[12px] font-semibold text-[#8B95A3] w-fit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} className="w-[13px] h-[13px]">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            {fechaFormateada}
+          </div>
+
+          {/* Botón Cerrar Caja alineado a la derecha */}
+          <button
+            type="button"
+            onClick={handleCerrarCaja}
+            disabled={isClosing}
+            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-400 font-bold text-xs rounded-[11px] transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-sm"
+          >
+            {isClosing ? (
+              <>
+                <svg className="animate-spin w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span>Cerrando...</span>
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="w-3.5 h-3.5">
+                  <path d="M20.5 11.5a8.5 8.5 0 1 1-3.3-6.7" />
+                  <path d="M21 4v5h-5" />
+                </svg>
+                <span>Cerrar caja</span>
+              </>
+            )}
+          </button>
         </div>
+
+        {/* Feedback Alert Toast de Cierre */}
+        {cierreFeedback && (
+          <div
+            className={`flex flex-col gap-2 p-3.5 rounded-xl text-xs font-medium border mb-3.5 animate-in fade-in duration-200 ${
+              cierreFeedback.type === 'error'
+                ? 'bg-[#C0526B]/15 border-[#C0526B]/40 text-[#E78B9F]'
+                : 'bg-emerald-950/50 border-emerald-800/60 text-emerald-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span>{cierreFeedback.message}</span>
+              <button
+                type="button"
+                onClick={() => setCierreFeedback(null)}
+                className="text-current opacity-70 hover:opacity-100 px-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            {cierreFeedback.whatsappUrl && (
+              <div className="flex items-center gap-2 pt-1 border-t border-emerald-800/40">
+                <a
+                  href={cierreFeedback.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-[11px] rounded-lg transition-colors"
+                >
+                  <span>Enviar a WhatsApp</span>
+                  <span>↗</span>
+                </a>
+                <Link
+                  href="/cierre"
+                  className="text-[11px] text-emerald-400 hover:underline px-2 py-1"
+                >
+                  Ver en panel admin →
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 2x2 KPI Grid */}
         <div className="grid grid-cols-2 gap-[10px] mb-[18px]">

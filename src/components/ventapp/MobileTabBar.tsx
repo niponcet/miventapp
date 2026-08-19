@@ -11,7 +11,7 @@ export function MobileTabBar() {
   const isAnalitica = pathname === '/ventapp/analitica';
 
   return (
-    <div className="absolute bottom-[max(0.85rem,env(safe-area-inset-bottom,0px))] left-0 right-0 flex justify-center z-40 pointer-events-none px-4">
+    <div className="fixed sm:absolute bottom-[max(0.85rem,env(safe-area-inset-bottom,0px))] left-0 right-0 flex justify-center z-40 pointer-events-none px-4">
       <nav
         className="pointer-events-auto flex items-center gap-[3px] bg-[#0F1419]/95 border border-[#2A333D] rounded-full p-[4px] shadow-2xl backdrop-blur-md"
         aria-label="Navegación principal de VentApp"
