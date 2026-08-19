@@ -1,15 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
-import { VentAppVentaView } from '@/components/ventapp/VentAppVentaView';
+import { VentAppInventarioView } from '@/components/ventapp/VentAppInventarioView';
 import type { Producto } from '@/types/database';
 
 export const metadata = {
-  title: 'Punto de Venta | VentApp',
-  description: 'Terminal de venta rápida en terreno',
+  title: 'Inventario | VentApp',
+  description: 'Consulta de stock y catálogo de productos en tiempo real',
 };
 
 export const dynamic = 'force-dynamic';
 
-export default async function VentAppVentaPage() {
+export default async function VentAppInventarioPage() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -18,10 +18,10 @@ export default async function VentAppVentaPage() {
     .order('nombre', { ascending: true });
 
   if (error) {
-    console.error('[VentApp Venta] Error al cargar productos:', error.message);
+    console.error('[VentApp Inventario] Error al cargar productos:', error.message);
   }
 
   const productos: Producto[] = data ?? [];
 
-  return <VentAppVentaView initialProductos={productos} />;
+  return <VentAppInventarioView initialProductos={productos} />;
 }

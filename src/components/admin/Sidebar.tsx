@@ -38,17 +38,6 @@ const mainNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/productos',
-    label: 'Inventario',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-        <rect x="3" y="6" width="18" height="14" rx="2" />
-        <path d="M3 10h18" />
-        <path d="M8 14h4" />
-      </svg>
-    ),
-  },
-  {
     href: '/ventapp',
     label: 'Ventas (POS)',
     icon: (
@@ -60,7 +49,7 @@ const mainNavItems: NavItem[] = [
     ),
   },
   {
-    href: '/dashboard',
+    href: '/cierre',
     label: 'Cierre de caja',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -139,16 +128,21 @@ export function Sidebar() {
 
       {/* Main navigation */}
       <div className={styles.navLabel}>General</div>
-      {mainNavItems.map((item) => (
-        <Link
-          key={item.label}
-          href={item.href}
-          className={`${styles.navItem} ${pathname === item.href ? styles.active : ''}`}
-        >
-          {item.icon}
-          {item.label}
-        </Link>
-      ))}
+      {mainNavItems.map((item) => {
+        const isActive =
+          pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+
+        return (
+          <Link
+            key={item.label}
+            href={item.href}
+            className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+          >
+            {item.icon}
+            {item.label}
+          </Link>
+        );
+      })}
 
       {/* Utility navigation */}
       <div className={styles.utilSection}>

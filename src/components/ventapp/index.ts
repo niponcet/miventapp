@@ -1,5 +1,8 @@
 /**
  * Barrel export para componentes de VentApp.
  */
-export { ProductGrid } from './ProductGrid';
-export { Cart } from './Cart';
+export { MobileTabBar } from './MobileTabBar';
+export { VentAppInventarioView } from './VentAppInventarioView';
+export { VentAppVentaView } from './VentAppVentaView';
+export { VentAppAnaliticaView } from './VentAppAnaliticaView';
+export * from './productUtils';
