@@ -239,7 +239,7 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                 </div>
 
                 <p style={{ fontSize: '12.5px', color: 'var(--text-faint, #64748B)', lineHeight: '1.4', marginBottom: '24px' }}>
-                  Al confirmar, se consolidarán las ventas en Supabase y se generará el enlace directo para enviar el reporte de WhatsApp al administrador (+56981680253).
+                  Al confirmar, se consolidarán las ventas en Supabase y se generará el enlace directo para enviar el reporte de WhatsApp al número registrado en la cuenta.
                 </p>
 
                 {errorMessage && (

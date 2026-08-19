@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     const selectedDateObj = new Date(targetDate + 'T12:00:00');
     const formattedDate = formatDateFull(selectedDateObj);
 
-    // 7. Preparar cuerpo y enlace oficial de WhatsApp (wa.me)
+    // 7. Preparar cuerpo y enlace oficial de WhatsApp (wa.me) usando el teléfono del usuario
     const waBody = `📊 *Cierre de Caja - MiVentAPP*
 📅 Jornada: ${formattedDate}
 💰 Total Vendido: $${totalVentas.toLocaleString('es-CL')}
@@ -139,7 +139,18 @@ export async function POST(request: NextRequest) {
 
 Resumen de ventas generado y respaldado automáticamente en Supabase.`;
 
-    const rawPhone = process.env.ADMIN_WHATSAPP_NUMBER || '56981680253';
+    // Consultar el teléfono del usuario desde la tabla 'usuarios' o desde auth metadata
+    let userPhone: string | null = null;
+    if (userId) {
+      const { data: userData } = await (supabase.from('usuarios' as any) as any)
+        .select('telefono')
+        .eq('id', userId)
+        .maybeSingle();
+
+      userPhone = userData?.telefono || (user?.user_metadata as any)?.telefono || null;
+    }
+
+    const rawPhone = userPhone || process.env.ADMIN_WHATSAPP_NUMBER || '56981680253';
     const cleanPhone = rawPhone.replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waBody)}`;
 
