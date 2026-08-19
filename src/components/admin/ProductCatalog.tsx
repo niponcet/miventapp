@@ -138,10 +138,47 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
     });
   }, []);
 
+  // ─── Validación de precios y stock ──────────────────────────────────────────
+  function validatePrecios(p: {
+    precio_neto: string;
+    precio_venta: string;
+    stock_actual?: string;
+    stock_minimo?: string;
+  }): string | null {
+    const neto = parseInt(p.precio_neto) || 0;
+    const venta = parseInt(p.precio_venta) || 0;
+    const stockAct = p.stock_actual !== undefined && p.stock_actual !== '' ? parseInt(p.stock_actual) : 0;
+    const stockMin = p.stock_minimo !== undefined && p.stock_minimo !== '' ? parseInt(p.stock_minimo) : 0;
+
+    if (p.precio_neto !== '' && parseInt(p.precio_neto) < 0) {
+      return 'El precio neto (costo) no puede ser negativo.';
+    }
+    if (p.precio_venta !== '' && parseInt(p.precio_venta) < 0) {
+      return 'El precio de venta no puede ser negativo.';
+    }
+    if (stockAct < 0) {
+      return 'El stock actual no puede ser negativo.';
+    }
+    if (stockMin < 0) {
+      return 'El stock mínimo no puede ser negativo.';
+    }
+    if (venta < neto) {
+      return `El precio de venta ($${venta.toLocaleString('es-CL')}) no puede ser menor al precio neto/costo ($${neto.toLocaleString('es-CL')}).`;
+    }
+    return null;
+  }
+
   // Actualizar producto
   const handleUpdateProduct = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editTarget || !editData.nombre.trim()) return;
+
+    const errorMsg = validatePrecios(editData);
+    if (errorMsg) {
+      alert(errorMsg);
+      return;
+    }
+
     setIsUpdating(true);
     try {
       const { data, error } = await supabase
@@ -177,6 +214,12 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nombre.trim()) return;
+
+    const errorMsg = validatePrecios(formData);
+    if (errorMsg) {
+      alert(errorMsg);
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -627,9 +670,23 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
                     min="0"
                     placeholder="1990"
                     className={styles.formInput}
+                    style={
+                      formData.precio_venta !== '' &&
+                      formData.precio_neto !== '' &&
+                      (parseInt(formData.precio_venta) || 0) < (parseInt(formData.precio_neto) || 0)
+                        ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 2px rgba(239,68,68,0.25)' }
+                        : {}
+                    }
                     value={formData.precio_venta}
                     onChange={(e) => setFormData({ ...formData, precio_venta: e.target.value })}
                   />
+                  {formData.precio_venta !== '' &&
+                    formData.precio_neto !== '' &&
+                    (parseInt(formData.precio_venta) || 0) < (parseInt(formData.precio_neto) || 0) && (
+                      <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: 4, display: 'block' }}>
+                        ⚠ El precio de venta no puede ser menor al costo (${(parseInt(formData.precio_neto) || 0).toLocaleString('es-CL')})
+                      </span>
+                    )}
                 </div>
 
                 <div className={styles.formGroup}>
@@ -744,9 +801,23 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
                     required
                     min="0"
                     className={styles.formInput}
+                    style={
+                      editData.precio_venta !== '' &&
+                      editData.precio_neto !== '' &&
+                      (parseInt(editData.precio_venta) || 0) < (parseInt(editData.precio_neto) || 0)
+                        ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 2px rgba(239,68,68,0.25)' }
+                        : {}
+                    }
                     value={editData.precio_venta}
                     onChange={(e) => setEditData({ ...editData, precio_venta: e.target.value })}
                   />
+                  {editData.precio_venta !== '' &&
+                    editData.precio_neto !== '' &&
+                    (parseInt(editData.precio_venta) || 0) < (parseInt(editData.precio_neto) || 0) && (
+                      <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: 4, display: 'block' }}>
+                        ⚠ El precio de venta no puede ser menor al costo (${(parseInt(editData.precio_neto) || 0).toLocaleString('es-CL')})
+                      </span>
+                    )}
                 </div>
 
                 <div className={styles.formGroup}>
