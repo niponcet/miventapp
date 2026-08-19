@@ -46,7 +46,7 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
     stock_minimo: '5',
   });
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -90,13 +90,30 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
-      const { error } = await supabase
+      // Verificar sesión activa antes de operar (RLS bloqueará silenciosamente si no hay sesión)
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Tu sesión ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+        return;
+      }
+
+      // 🔍 DIAGNÓSTICO: compara auth.uid() con el user_id del producto
+      console.log('[DELETE] session user:', session.user.id);
+      console.log('[DELETE] producto user_id:', deleteTarget.user_id);
+      console.log('[DELETE] producto id:', deleteTarget.id);
+      console.log('[DELETE] ¿coinciden?', session.user.id === deleteTarget.user_id);
+
+      const { error, count } = await supabase
         .from('productos')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('id', deleteTarget.id);
+
+      console.log('[DELETE] error:', error, '| count:', count);
 
       if (error) {
         alert('Error al eliminar el producto: ' + error.message);
+      } else if (count === 0) {
+        alert('El producto no fue eliminado. Es posible que ya haya sido eliminado o no tengas permisos.');
       } else {
         setProductos((prev) => prev.filter((p) => p.id !== deleteTarget.id));
       }
@@ -137,7 +154,7 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
         })
         .eq('id', editTarget.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         alert('Error al actualizar el producto: ' + error.message);
@@ -146,6 +163,8 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
           prev.map((p) => (p.id === data.id ? data : p)).sort((a, b) => a.nombre.localeCompare(b.nombre))
         );
         setEditTarget(null);
+      } else {
+        alert('No se encontró el producto a actualizar. Es posible que no exista en la base de datos.');
       }
     } finally {
       setIsUpdating(false);
@@ -159,9 +178,17 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
 
     setIsSubmitting(true);
     try {
+      // Verificar sesión activa antes de operar
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Tu sesión ha expirado. Por favor, recarga la página e inicia sesión nuevamente.');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('productos')
         .insert({
+          user_id: session.user.id,        // ← explícito para no depender del DEFAULT
           nombre: formData.nombre.trim(),
           descripcion: formData.descripcion.trim() || null,
           precio_neto: parseInt(formData.precio_neto) || 0,
@@ -170,7 +197,7 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
           stock_minimo: parseInt(formData.stock_minimo) || 5,
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         alert('Error al crear el producto: ' + error.message);
@@ -185,6 +212,8 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
           stock_actual: '',
           stock_minimo: '5',
         });
+      } else {
+        alert('No se pudo crear el producto. Verifica tus permisos e intenta de nuevo.');
       }
     } finally {
       setIsSubmitting(false);
@@ -198,8 +227,8 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
     const valorInventario = productos.reduce((sum, p) => sum + p.precio_venta * p.stock_actual, 0);
     const stockCriticoCount = productos.filter((p) => p.stock_actual <= p.stock_minimo).length;
     const costoTotal = productos.reduce((sum, p) => sum + p.precio_neto * p.stock_actual, 0);
-    const margenTotalPromedio = valorInventario > 0 
-      ? Math.round(((valorInventario - costoTotal) / valorInventario) * 100) 
+    const margenTotalPromedio = valorInventario > 0
+      ? Math.round(((valorInventario - costoTotal) / valorInventario) * 100)
       : 0;
 
     return {
@@ -336,9 +365,8 @@ export function ProductCatalog({ initialProductos }: ProductCatalogProps) {
 
         {/* Card 4: Stock Crítico */}
         <div
-          className={`${styles.kpiCard} ${
-            stats.stockCriticoCount > 0 ? styles.cDanger : styles.cWarn
-          }`}
+          className={`${styles.kpiCard} ${stats.stockCriticoCount > 0 ? styles.cDanger : styles.cWarn
+            }`}
         >
           <div className={styles.kpiTop}>
             <span className={styles.kpiLabel}>Stock crítico</span>

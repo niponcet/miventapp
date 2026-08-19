@@ -67,18 +67,18 @@ const kpis = [
 ];
 
 const productosVendidos = [
-  { nombre: 'Aceite de motor 20W-50', categoria: 'Lubricantes', cantidad: 12, venta: '$96.000',  ganancia: '$28.800', dotColor: 'var(--accent)' },
-  { nombre: 'Filtro de aire universal', categoria: 'Repuestos',   cantidad: 8,  venta: '$64.000',  ganancia: '$22.400', dotColor: 'var(--profit)' },
-  { nombre: 'Pastillas de freno delanteras', categoria: 'Frenos', cantidad: 5,  venta: '$125.000', ganancia: '$41.250', dotColor: 'var(--warn)' },
-  { nombre: 'Bujía de encendido NGK', categoria: 'Encendido',     cantidad: 20, venta: '$70.000',  ganancia: '$24.000', dotColor: 'var(--accent)' },
-  { nombre: 'Correa de distribución', categoria: 'Motor',         cantidad: 3,  venta: '$87.000',  ganancia: '$26.100', dotColor: 'var(--danger)' },
-  { nombre: 'Líquido refrigerante 1L', categoria: 'Fluidos',      cantidad: 9,  venta: '$44.500',  ganancia: '$16.020', dotColor: 'var(--profit)' },
+  { nombre: 'Aceite de motor 20W-50', categoria: 'Lubricantes', cantidad: 12, venta: '$96.000', ganancia: '$28.800', dotColor: 'var(--accent)' },
+  { nombre: 'Filtro de aire universal', categoria: 'Repuestos', cantidad: 8, venta: '$64.000', ganancia: '$22.400', dotColor: 'var(--profit)' },
+  { nombre: 'Pastillas de freno delanteras', categoria: 'Frenos', cantidad: 5, venta: '$125.000', ganancia: '$41.250', dotColor: 'var(--warn)' },
+  { nombre: 'Bujía de encendido NGK', categoria: 'Encendido', cantidad: 20, venta: '$70.000', ganancia: '$24.000', dotColor: 'var(--accent)' },
+  { nombre: 'Correa de distribución', categoria: 'Motor', cantidad: 3, venta: '$87.000', ganancia: '$26.100', dotColor: 'var(--danger)' },
+  { nombre: 'Líquido refrigerante 1L', categoria: 'Fluidos', cantidad: 9, venta: '$44.500', ganancia: '$16.020', dotColor: 'var(--profit)' },
 ];
 
 const stockCritico = [
-  { nombre: 'Correa de distribución', categoria: 'Motor',       stock: 2, nivel: 'critical' as const },
-  { nombre: 'Pastillas de freno del.', categoria: 'Frenos',      stock: 3, nivel: 'critical' as const },
-  { nombre: 'Filtro de aceite',        categoria: 'Lubricantes', stock: 6, nivel: 'low' as const },
+  { nombre: 'Correa de distribución', categoria: 'Motor', stock: 2, nivel: 'critical' as const },
+  { nombre: 'Pastillas de freno del.', categoria: 'Frenos', stock: 3, nivel: 'critical' as const },
+  { nombre: 'Filtro de aceite', categoria: 'Lubricantes', stock: 6, nivel: 'low' as const },
 ];
 
 /* ─── Componente ─────────────────────────────────────────────────────────────── */
