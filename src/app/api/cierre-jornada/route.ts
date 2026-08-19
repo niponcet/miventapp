@@ -154,39 +154,49 @@ Resumen de ventas generado y respaldado automáticamente en Supabase.`;
     const cleanPhone = rawPhone.replace(/\D/g, '');
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waBody)}`;
 
-    // 8. Preparar y Enviar Notificación de Gmail (Resend / Fallback)
-    const emailSubject = `Resumen de Cierre de Caja - ${targetDate}`;
+    // 8. Preparar y Enviar Notificación de Gmail (Opción A: Al usuario de la sesión)
+    const targetEmail = user?.email || process.env.ADMIN_EMAIL || 'javo161669@gmail.com';
+    const userMetadata = (user?.user_metadata as any) || {};
+    const businessOrUserName = userMetadata.nombre_completo || user?.email?.split('@')[0] || 'Administrador';
+
+    const emailSubject = `📊 Resumen de Cierre de Caja - ${formattedDate}`;
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <h2 style="color: #0b1220; border-bottom: 2px solid #3b82f6; padding-bottom: 10px;">📊 Cierre de Caja - MiVentAPP</h2>
-        <p style="font-size: 16px; color: #333;">Se ha consolidado el cierre de caja de la jornada del <strong>${formattedDate}</strong>.</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+        <div style="border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin-bottom: 16px;">
+          <h2 style="color: #0f172a; margin: 0; font-size: 20px;">📊 Cierre de Caja — MiVentAPP</h2>
+          <span style="color: #64748b; font-size: 13px;">Resumen diario de tu negocio</span>
+        </div>
+
+        <p style="font-size: 15px; color: #334155; line-height: 1.5;">
+          Hola <strong>${businessOrUserName}</strong>, se ha consolidado exitosamente el cierre de caja de tu jornada del <strong>${formattedDate}</strong>.
+        </p>
         
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
           <tr style="background-color: #f8fafc;">
-            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;">Total Vendido</td>
-            <td style="padding: 10px; border: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: bold;">$${totalVentas.toLocaleString('es-CL')}</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Total Vendido</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: 700; font-size: 16px; color: #0f172a;">$${totalVentas.toLocaleString('es-CL')}</td>
           </tr>
           <tr>
-            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; color: #10b981;">Ganancia Neta</td>
-            <td style="padding: 10px; border: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: bold; color: #10b981;">$${gananciaNeta.toLocaleString('es-CL')}</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #10b981;">Ganancia Neta</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: 700; font-size: 16px; color: #10b981;">$${gananciaNeta.toLocaleString('es-CL')}</td>
           </tr>
           <tr style="background-color: #f8fafc;">
-            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold;">Transacciones</td>
-            <td style="padding: 10px; border: 1px solid #e2e8f0; text-align: right; font-family: monospace;">${ventasList.length}</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Transacciones Registradas</td>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace; font-weight: 600; color: #0f172a;">${ventasList.length} ventas</td>
           </tr>
           <tr>
-            <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; color: #f59e0b;">Stock Crítico</td>
-            <td style="padding: 10px; border: 1px solid #e2e8f0; text-align: right; font-family: monospace; color: #f59e0b;">${stockCriticoList.length} productos</td>
+            <td style="padding: 12px 16px; font-weight: 600; color: #f59e0b;">Productos en Stock Crítico</td>
+            <td style="padding: 12px 16px; text-align: right; font-family: monospace; font-weight: 600; color: #f59e0b;">${stockCriticoList.length} productos</td>
           </tr>
         </table>
 
-        <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
-          Este reporte fue generado de forma automática al consolidar el cierre de jornada en MiVentApp.
-        </p>
+        <div style="background-color: #f1f5f9; border-radius: 8px; padding: 12px 16px; margin-top: 20px; font-size: 12.5px; color: #64748b;">
+          📌 Este balance fue enviado automáticamente a tu cuenta (<strong>${targetEmail}</strong>) al ejecutar el cierre de jornada.
+        </div>
       </div>
     `;
 
-    const emailResult = await sendEmail({ subject: emailSubject, html: emailHtml });
+    const emailResult = await sendEmail({ to: targetEmail, subject: emailSubject, html: emailHtml });
 
     // 9. Registrar auditoría en la tabla 'notificaciones'
     try {

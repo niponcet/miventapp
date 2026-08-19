@@ -12,24 +12,33 @@ export interface SendEmailResult {
 }
 
 export async function sendEmail({
+  to: recipientTo,
   subject,
   html,
 }: {
+  to?: string;
   subject: string;
   html: string;
 }): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM || 'noreply@miventapp.com';
-  const to = process.env.ADMIN_EMAIL;
+  let from = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+  const to = recipientTo || process.env.ADMIN_EMAIL || 'javo161669@gmail.com';
 
-  // Validar si falta alguna credencial clave para entrar en modo SIMULADO
-  if (!apiKey || !to) {
-    console.log('\n--- [MOCK GMAIL NOTIFICATION] ---');
-    console.log(`Para: ${to || 'No especificado (ADMIN_EMAIL)'}`);
+  // Si se usa Resend con una cuenta de prueba gratuita sin dominio propio,
+  // el remitente debe ser onboarding@resend.dev
+  if (apiKey && from.includes('@gmail.com')) {
+    from = 'MiVentApp <onboarding@resend.dev>';
+  }
+
+  // Si no hay API Key configurada, opera en modo SIMULACIÓN con registro completo
+  if (!apiKey) {
+    console.log('\n================ [CORREO SIMULADO] ================');
+    console.log(`Para: ${to}`);
     console.log(`Desde: ${from}`);
     console.log(`Asunto: ${subject}`);
-    console.log('Cuerpo del Mensaje (HTML):\n', html);
-    console.log('----------------------------------\n');
+    console.log('----------------------------------------------------');
+    console.log('Estado: Simulado exitosamente (agrega RESEND_API_KEY para envío real)');
+    console.log('====================================================\n');
     return { success: true, simulated: true };
   }
 
@@ -42,7 +51,7 @@ export async function sendEmail({
       },
       body: JSON.stringify({
         from,
-        to,
+        to: [to],
         subject,
         html,
       }),

@@ -96,7 +96,7 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(4px)',
+            backdropFilter: 'blur(6px)',
             padding: '16px',
           }}
           onClick={handleCloseModal}
@@ -115,7 +115,7 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Si ya se completó el cierre, mostramos la pantalla de éxito con botón directo de WhatsApp */}
+            {/* Si ya se completó el cierre, mostramos la pantalla de éxito con estilo VentApp POS */}
             {resultData ? (
               <div>
                 <div
@@ -123,8 +123,8 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                     width: '48px',
                     height: '48px',
                     borderRadius: '12px',
-                    background: 'var(--profit-soft, rgba(16, 185, 129, 0.15))',
-                    color: 'var(--profit, #10B981)',
+                    background: 'rgba(16, 185, 129, 0.15)',
+                    color: '#10B981',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -136,15 +136,15 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                   </svg>
                 </div>
 
-                <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', fontFamily: 'Space Grotesk, sans-serif' }}>
-                  ¡Caja cerrada con éxito!
+                <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', fontFamily: 'Space Grotesk, sans-serif' }}>
+                  Cierre de caja generado con éxito
                 </h3>
 
                 <p style={{ fontSize: '13.5px', color: 'var(--text-dim, #94A3B8)', lineHeight: '1.5', marginBottom: '16px' }}>
-                  Se ha consolidado el resumen de la jornada del <strong>{formattedDate}</strong> en la base de datos y respaldado por correo.
+                  Se ha consolidado el balance de la jornada del <strong>{formattedDate}</strong> en la base de datos y respaldado por correo.
                 </p>
 
-                {/* Botón directo de WhatsApp (Opción 4: wa.me) */}
+                {/* Botón directo de WhatsApp estilo VentApp POS */}
                 {resultData.whatsappUrl && (
                   <a
                     href={resultData.whatsappUrl}
@@ -154,23 +154,21 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '10px',
+                      gap: '8px',
                       width: '100%',
-                      background: '#25D366',
-                      color: '#FFFFFF',
+                      background: '#10B981',
+                      color: '#000000',
                       textDecoration: 'none',
-                      borderRadius: '8px',
+                      borderRadius: '10px',
                       padding: '12px 16px',
-                      fontSize: '14px',
-                      fontWeight: 600,
+                      fontSize: '13.5px',
+                      fontWeight: 700,
                       marginBottom: '10px',
-                      boxShadow: '0 4px 14px rgba(37, 211, 102, 0.3)',
+                      transition: 'all 0.15s',
                     }}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                    </svg>
-                    Enviar Resumen por WhatsApp
+                    <span>Enviar a WhatsApp</span>
+                    <span style={{ fontSize: '15px' }}>↗</span>
                   </a>
                 )}
 
@@ -182,7 +180,7 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                     background: 'var(--surface-3, #1F2C42)',
                     color: 'var(--text-dim, #94A3B8)',
                     border: '1px solid var(--border, #334155)',
-                    borderRadius: '8px',
+                    borderRadius: '10px',
                     padding: '10px 16px',
                     fontSize: '13px',
                     fontWeight: 500,
@@ -200,8 +198,8 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                     width: '48px',
                     height: '48px',
                     borderRadius: '12px',
-                    background: 'var(--warn-soft, rgba(245, 158, 11, 0.15))',
-                    color: 'var(--warn, #F59E0B)',
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    color: '#F59E0B',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -215,27 +213,34 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                   </svg>
                 </div>
 
-                <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px', fontFamily: 'Space Grotesk, sans-serif' }}>
-                  ¿Confirmar Cierre de Caja?
+                <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', fontFamily: 'Space Grotesk, sans-serif' }}>
+                  Confirmar Cierre de Caja
                 </h3>
 
                 <p style={{ fontSize: '13.5px', color: 'var(--text-dim, #94A3B8)', lineHeight: '1.5', marginBottom: '14px' }}>
-                  Estás a punto de cerrar la caja de la jornada del:
+                  Estás a punto de cerrar la caja de la jornada:
                 </p>
 
                 <div
                   style={{
-                    display: 'inline-block',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
                     background: 'var(--surface-3, #1F2C42)',
                     border: '1px solid var(--border, #334155)',
-                    borderRadius: '6px',
-                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    padding: '6px 12px',
                     fontSize: '12.5px',
                     fontWeight: 600,
                     marginBottom: '16px',
+                    color: 'var(--text, #E7EBEF)',
                   }}
                 >
-                  📅 {formattedDate}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: '14px', height: '14px', color: 'var(--accent, #38BDF8)' }}>
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <path d="M16 2v4M8 2v4M3 10h18" />
+                  </svg>
+                  {formattedDate}
                 </div>
 
                 <p style={{ fontSize: '12.5px', color: 'var(--text-faint, #64748B)', lineHeight: '1.4', marginBottom: '24px' }}>
@@ -252,9 +257,17 @@ export function CloseRegisterButton({ date }: CloseRegisterButtonProps) {
                       borderRadius: '8px',
                       fontSize: '12.5px',
                       marginBottom: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
                     }}
                   >
-                    ⚠️ {errorMessage}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ width: '16px', height: '16px', flexShrink: 0 }}>
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span>{errorMessage}</span>
                   </div>
                 )}
 
