@@ -19,7 +19,14 @@ export interface CheckoutResult {
 
 /**
  * Server Action para registrar una venta en terreno desde VentApp.
- * Valida stock, descuenta existencias, registra la venta y su detalle en Supabase.
+ * 
+ * Flujo Transaccional Atómico:
+ * 1. Valida usuario autenticado y existencias en catálogo.
+ * 2. Inserta la orden en public.ventas.
+ * 3. Inserta los ítems en public.detalle_ventas.
+ *    -> El trigger de PostgreSQL `trg_procesar_venta_stock` descuenta el stock en `productos`
+ *       y crea el registro de auditoría en `movimientos_stock` de forma 100% atómica.
+ * 4. Revalida las rutas afectadas para sincronización inmediata del POS y Dashboard.
  */
 export async function registrarVentaAction(items: CheckoutItem[]): Promise<CheckoutResult> {
   if (!items || items.length === 0) {
@@ -35,7 +42,7 @@ export async function registrarVentaAction(items: CheckoutItem[]): Promise<Check
 
   const userId = user?.id || '00000000-0000-0000-0000-000000000000';
 
-  // 2. Obtener productos de la base de datos para validar stock y precios
+  // 2. Obtener productos de la base de datos para validar existencias y precios vigentes
   const productIds = items.map((i) => i.productoId);
   const { data: dbProducts, error: prodError } = await supabase
     .from('productos')
@@ -60,7 +67,7 @@ export async function registrarVentaAction(items: CheckoutItem[]): Promise<Check
     }
   }
 
-  // 4. Calcular totales
+  // 4. Calcular totales consolidados
   let totalVenta = 0;
   let gananciaNeta = 0;
   let totalUnits = 0;
@@ -75,7 +82,7 @@ export async function registrarVentaAction(items: CheckoutItem[]): Promise<Check
     totalUnits += item.cantidad;
   }
 
-  // 5. Crear registro de venta
+  // 5. Crear registro de venta principal
   const { data: ventaData, error: ventaError } = await supabase
     .from('ventas')
     .insert({
@@ -93,7 +100,7 @@ export async function registrarVentaAction(items: CheckoutItem[]): Promise<Check
 
   const ventaId = ventaData.id;
 
-  // 6. Insertar detalle de venta
+  // 6. Insertar detalle de venta (dispara el trigger atómico trg_procesar_venta_stock en PostgreSQL)
   const detalles = items.map((item) => {
     const product = dbProducts.find((p) => p.id === item.productoId)!;
     return {
@@ -108,30 +115,11 @@ export async function registrarVentaAction(items: CheckoutItem[]): Promise<Check
   const { error: detalleError } = await supabase.from('detalle_ventas').insert(detalles);
 
   if (detalleError) {
-    console.error('[Checkout] Error en detalle_ventas:', detalleError);
+    console.error('[Checkout] Error al insertar detalle_ventas:', detalleError);
+    return { success: false, error: 'Error al registrar el detalle de la venta: ' + detalleError.message };
   }
 
-  // 7. Actualizar stock de cada producto y registrar movimiento
-  for (const item of items) {
-    const product = dbProducts.find((p) => p.id === item.productoId)!;
-    const nuevoStock = product.stock_actual - item.cantidad;
-
-    // Actualizar stock
-    await supabase
-      .from('productos')
-      .update({ stock_actual: nuevoStock })
-      .eq('id', item.productoId);
-
-    // Registrar movimiento de stock
-    await supabase.from('movimientos_stock').insert({
-      producto_id: item.productoId,
-      user_id: userId,
-      cantidad: item.cantidad,
-      tipo: 'venta',
-    });
-  }
-
-  // 8. Revalidar rutas para actualizar el dashboard, inventario y catálogo
+  // 7. Revalidar rutas para actualizar el dashboard, inventario, analítica y catálogo en tiempo real
   revalidatePath('/ventapp');
   revalidatePath('/ventapp/inventario');
   revalidatePath('/ventapp/analitica');

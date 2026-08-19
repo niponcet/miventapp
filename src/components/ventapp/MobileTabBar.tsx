@@ -11,7 +11,7 @@ export function MobileTabBar() {
   const isAnalitica = pathname === '/ventapp/analitica';
 
   return (
-    <div className="fixed sm:absolute bottom-[max(0.75rem,env(safe-area-inset-bottom,0px))] left-0 right-0 flex justify-center z-30 pointer-events-none px-4">
+    <div className="absolute bottom-[max(0.85rem,env(safe-area-inset-bottom,0px))] left-0 right-0 flex justify-center z-40 pointer-events-none px-4">
       <nav
         className="pointer-events-auto flex items-center gap-[3px] bg-[#0F1419]/95 border border-[#2A333D] rounded-full p-[4px] shadow-2xl backdrop-blur-md"
         aria-label="Navegación principal de VentApp"
@@ -19,7 +19,7 @@ export function MobileTabBar() {
         {/* Tab 1: Venta */}
         <Link
           href="/ventapp"
-          className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-xs font-semibold select-none transition-all duration-150 active:scale-95 ${
+          className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-xs font-semibold select-none transition-all duration-150 active:scale-95 cursor-pointer ${
             isVenta
               ? 'bg-[#5B8DEF] text-[#06121F] shadow-sm'
               : 'text-[#8B95A3] hover:text-[#E7EBEF]'
@@ -36,7 +36,7 @@ export function MobileTabBar() {
         {/* Tab 2: Inventario */}
         <Link
           href="/ventapp/inventario"
-          className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-xs font-semibold select-none transition-all duration-150 active:scale-95 ${
+          className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-xs font-semibold select-none transition-all duration-150 active:scale-95 cursor-pointer ${
             isInventario
               ? 'bg-[#5B8DEF] text-[#06121F] shadow-sm'
               : 'text-[#8B95A3] hover:text-[#E7EBEF]'
@@ -52,7 +52,7 @@ export function MobileTabBar() {
         {/* Tab 3: Analítica */}
         <Link
           href="/ventapp/analitica"
-          className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-xs font-semibold select-none transition-all duration-150 active:scale-95 ${
+          className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-full text-xs font-semibold select-none transition-all duration-150 active:scale-95 cursor-pointer ${
             isAnalitica
               ? 'bg-[#5B8DEF] text-[#06121F] shadow-sm'
               : 'text-[#8B95A3] hover:text-[#E7EBEF]'

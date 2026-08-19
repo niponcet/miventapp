@@ -57,7 +57,16 @@ html, body {
   font-family: 'Inter', var(--font-sans, sans-serif);
   font-size: 14px;
   touch-action: manipulation;
+  -webkit-touch-callout: none;
+  overscroll-behavior-y: none;
   -webkit-text-size-adjust: 100%;
+}
+
+/* Evitar zoom automático indeseado en inputs en dispositivos móviles */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* ─── PWA & Safe Area Insets ─────────────────────────────────────────────────── */

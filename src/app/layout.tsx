@@ -41,7 +41,9 @@ export const viewport: Viewport = {
   themeColor: "#0F1419",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
+  maximumScale: 1,
+  minimumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 
@@ -55,7 +57,7 @@ export default function RootLayout({
       lang="es"
       className={`${inter.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#0F1419] text-[#E7EBEF]">
+      <body className="min-h-full flex flex-col bg-[#0F1419] text-[#E7EBEF] select-none touch-manipulation">
         <PwaRegister />
         {children}
       </body>

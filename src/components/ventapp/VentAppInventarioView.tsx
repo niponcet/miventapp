@@ -27,8 +27,8 @@ export function VentAppInventarioView({ initialProductos }: VentAppInventarioVie
 
   return (
     <div className="flex-1 flex flex-col bg-[#0F1419] text-[#E7EBEF] w-full">
-      {/* Header con soporte Safe-Area */}
-      <header className="flex items-center justify-between px-[20px] pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[14px] shrink-0">
+      {/* Header Fijo con soporte Safe-Area y Blur Nativo */}
+      <header className="sticky top-0 z-30 bg-[#0F1419]/90 backdrop-blur-md border-b border-[#232B34]/60 flex items-center justify-between px-5 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-3.5 shrink-0 transition-colors">
         <div>
           <h1 className="font-heading font-bold text-[19px] text-[#E7EBEF] tracking-tight">
             Inventario
@@ -55,7 +55,7 @@ export function VentAppInventarioView({ initialProductos }: VentAppInventarioVie
       </header>
 
       {/* Body */}
-      <div className="flex-1 px-[18px] pb-6 min-h-0">
+      <div className="flex-1 px-5 pt-3.5 pb-6 min-h-0">
         {/* Search */}
         <div className="flex items-center gap-[9px] bg-[#1A2129] border border-[#2A333D] rounded-[14px] px-[13px] py-[11px] mb-[12px] min-h-[44px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="w-[16px] h-[16px] text-[#5B6472] shrink-0">

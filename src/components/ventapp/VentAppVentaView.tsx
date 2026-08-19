@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo, useTransition } from 'react';
-import Link from 'next/link';
+import { useState, useTransition } from 'react';
 import type { Producto } from '@/types/database';
 import { formatCLP, getProductIcon } from './productUtils';
 import { ProfileButton } from './ProfileButton';
+import { useCartStore } from '@/store/useCartStore';
 import { registrarVentaAction } from '@/app/(ventapp)/actions';
 
 interface VentAppVentaViewProps {
@@ -14,122 +14,85 @@ interface VentAppVentaViewProps {
 export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
   const [productos, setProductos] = useState<Producto[]>(initialProductos);
   const [search, setSearch] = useState('');
-  const [selectedItems, setSelectedItems] = useState<{ [id: string]: number }>({});
   const [isPending, startTransition] = useTransition();
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [completedSale, setCompletedSale] = useState<{
-    totalVenta: number;
-    units: number;
-    id: string;
-  } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null);
+  const [completedSale, setCompletedSale] = useState<{ units: number; totalVenta: number } | null>(null);
 
-  // Filtrado reactivo en tiempo real
-  const filteredProducts = useMemo(() => {
-    if (!search.trim()) return productos;
-    const q = search.toLowerCase();
-    return productos.filter(
-      (p) =>
-        p.nombre.toLowerCase().includes(q) ||
-        (p.descripcion && p.descripcion.toLowerCase().includes(q))
-    );
-  }, [productos, search]);
+  // Zustand Store del Carrito
+  const cartItems = useCartStore((state) => state.items);
+  const addItem = useCartStore((state) => state.addItem);
+  const removeOne = useCartStore((state) => state.removeOne);
+  const clearCart = useCartStore((state) => state.clearCart);
 
-  // Manejo de carrito rápido con validación estricta de stock
-  const handleProductClick = (product: Producto) => {
-    if (product.stock_actual <= 0) {
-      setStatusMessage({
-        type: 'error',
-        text: `"${product.nombre}" está agotado (0 unidades disponibles).`,
-      });
-      return;
-    }
+  // Totales derivados de Zustand
+  const totalUnits = cartItems.reduce((sum, i) => sum + i.cantidad, 0);
+  const totalAmount = cartItems.reduce((sum, i) => sum + i.producto.precio_venta * i.cantidad, 0);
 
-    const currentQty = selectedItems[product.id] || 0;
-    if (currentQty >= product.stock_actual) {
-      setStatusMessage({
-        type: 'error',
-        text: `No puedes agregar más de ${product.stock_actual} unidades disponibles de "${product.nombre}".`,
-      });
-      return;
-    }
+  // Filtrar productos por búsqueda
+  const filteredProducts = productos.filter((p) =>
+    p.nombre.toLowerCase().includes(search.toLowerCase()) ||
+    (p.descripcion && p.descripcion.toLowerCase().includes(search.toLowerCase()))
+  );
 
+  const handleProductClick = (producto: Producto) => {
     setStatusMessage(null);
-    setSelectedItems((prev) => ({
-      ...prev,
-      [product.id]: (prev[product.id] || 0) + 1,
-    }));
+    const result = addItem(producto);
+
+    if (!result.success && result.message) {
+      setStatusMessage({ text: result.message, type: 'error' });
+    }
   };
 
-  const handleRemoveOne = (productId: string, e: React.MouseEvent) => {
+  const handleRemoveOne = (productoId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setStatusMessage(null);
-    setSelectedItems((prev) => {
-      const current = prev[productId] || 0;
-      if (current <= 1) {
-        const next = { ...prev };
-        delete next[productId];
-        return next;
-      }
-      return { ...prev, [productId]: current - 1 };
-    });
+    removeOne(productoId);
   };
-
-  // Totales
-  const totalUnits = useMemo(() => {
-    return Object.values(selectedItems).reduce((sum, qty) => sum + qty, 0);
-  }, [selectedItems]);
-
-  const totalAmount = useMemo(() => {
-    return Object.entries(selectedItems).reduce((sum, [id, qty]) => {
-      const prod = productos.find((p) => p.id === id);
-      return sum + (prod ? prod.precio_venta * qty : 0);
-    }, 0);
-  }, [selectedItems, productos]);
 
   const handleClear = () => {
-    setSelectedItems({});
     setStatusMessage(null);
+    clearCart();
   };
 
-  // Ejecutar Cobro Real en Supabase
-  const handleCobrar = async () => {
-    if (totalUnits === 0 || isPending) return;
+  const handleCobrar = () => {
+    if (totalUnits === 0) return;
 
-    const items = Object.entries(selectedItems).map(([productoId, cantidad]) => ({
-      productoId,
-      cantidad,
-    }));
-
+    setStatusMessage(null);
     startTransition(async () => {
-      const result = await registrarVentaAction(items);
+      const itemsToCheckout = cartItems.map((i) => ({
+        productoId: i.producto.id,
+        cantidad: i.cantidad,
+      }));
+
+      const result = await registrarVentaAction(itemsToCheckout);
 
       if (!result.success) {
         setStatusMessage({
+          text: result.error || 'Ocurrió un error al procesar el cobro',
           type: 'error',
-          text: result.error || 'Error al procesar la venta.',
         });
       } else {
-        // Descontar stock localmente de inmediato
+        const unitsSold = totalUnits;
+        const totalVenta = result.totalVenta || totalAmount;
+
+        // Descontar existencias en el estado local de productos de la vista
         setProductos((prev) =>
           prev.map((p) => {
-            const sold = selectedItems[p.id];
-            if (sold) {
-              return { ...p, stock_actual: Math.max(0, p.stock_actual - sold) };
+            const soldItem = cartItems.find((i) => i.producto.id === p.id);
+            if (soldItem) {
+              return { ...p, stock_actual: Math.max(0, p.stock_actual - soldItem.cantidad) };
             }
             return p;
           })
         );
 
-        setCompletedSale({
-          totalVenta: result.totalVenta || totalAmount,
-          units: result.totalUnits || totalUnits,
-          id: result.ventaId || '',
-        });
+        // Limpiar carrito en Zustand
+        clearCart();
 
-        setSelectedItems({});
-        setStatusMessage({
-          type: 'success',
-          text: `¡Venta de ${formatCLP(result.totalVenta || totalAmount)} registrada con éxito!`,
+        // Mostrar ticket modal de confirmación
+        setCompletedSale({
+          units: unitsSold,
+          totalVenta,
         });
       }
     });
@@ -137,8 +100,8 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
 
   return (
     <div className="flex-1 flex flex-col bg-[#0F1419] text-[#E7EBEF] w-full">
-      {/* Header con soporte Safe-Area */}
-      <header className="flex items-center justify-between px-5 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-3.5 shrink-0">
+      {/* Header Fijo con soporte Safe-Area y Blur Nativo */}
+      <header className="sticky top-0 z-30 bg-[#0F1419]/90 backdrop-blur-md border-b border-[#232B34]/60 flex items-center justify-between px-5 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-3.5 shrink-0 transition-colors">
         <h1 className="font-heading font-bold text-[19px] text-[#E7EBEF] tracking-tight">
           Nueva venta
         </h1>
@@ -160,7 +123,7 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
       </header>
 
       {/* Search Row */}
-      <div className="px-5 pb-3.5 shrink-0">
+      <div className="px-5 pt-3.5 pb-3.5 shrink-0">
         <div className="flex items-center gap-2.5 bg-[#1A2129] border border-[#2A333D] rounded-[16px] px-3.5 py-3 min-h-[44px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.6} className="w-[18px] h-[18px] text-[#5B6472] shrink-0">
             <circle cx="11" cy="11" r="7" />
@@ -256,11 +219,11 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
 
         {/* Selected Items Floating Summary Bar */}
         {totalUnits > 0 && (
-          <div className="flex items-center justify-between bg-[#1A2129] border border-[#5B8DEF]/40 rounded-xl px-3.5 py-2.5 mb-3 shadow-lg">
+          <div className="flex items-center justify-between bg-[#1A2129] border border-[#5B8DEF]/40 rounded-xl px-3.5 py-2.5 mb-3 shadow-lg animate-in fade-in duration-200">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#5B8DEF] animate-pulse" />
               <span className="text-xs text-[#E7EBEF] font-semibold">
-                {totalUnits} ítem(s) seleccionados
+                {totalUnits} ítem(s) en la orden
               </span>
             </div>
             <span className="font-mono text-sm font-bold text-[#5B8DEF]">
@@ -281,7 +244,8 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
         ) : (
           <div className="grid grid-cols-2 gap-3 pb-6">
             {filteredProducts.map((p) => {
-              const qtySelected = selectedItems[p.id] || 0;
+              const cartItem = cartItems.find((i) => i.producto.id === p.id);
+              const qtySelected = cartItem ? cartItem.cantidad : 0;
               const isOutOfStock = p.stock_actual <= 0;
               const isMaxSelected = qtySelected >= p.stock_actual;
               const icon = getProductIcon(p.nombre);
@@ -290,7 +254,7 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
                 <div
                   key={p.id}
                   onClick={() => handleProductClick(p)}
-                  className={`bg-[#1A2129] border rounded-[16px] p-[12px_11px_11px] flex flex-col gap-2 transition-all relative ${
+                  className={`bg-[#1A2129] border rounded-[16px] p-[12px_11px_11px] flex flex-col gap-2 transition-all relative select-none ${
                     isOutOfStock
                       ? 'opacity-40 border-[#232B34] cursor-not-allowed'
                       : qtySelected > 0
@@ -302,8 +266,9 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
                   {qtySelected > 0 && (
                     <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
                       <button
+                        type="button"
                         onClick={(e) => handleRemoveOne(p.id, e)}
-                        className="w-5 h-5 rounded-full bg-[#C0526B] text-white flex items-center justify-center text-xs font-bold hover:opacity-90 active:scale-90"
+                        className="w-5 h-5 rounded-full bg-[#C0526B] text-white flex items-center justify-center text-xs font-bold hover:opacity-90 active:scale-90 cursor-pointer"
                         title="Quitar uno"
                       >
                         -
@@ -366,7 +331,7 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
           onClick={() => setCompletedSale(null)}
         >
           <div
-            className="w-full max-w-xs bg-[#1A2129] border border-[#2A333D] rounded-3xl p-6 shadow-2xl text-center"
+            className="w-full max-w-xs bg-[#1A2129] border border-[#2A333D] rounded-3xl p-6 shadow-2xl text-center animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-12 rounded-2xl bg-[#4F9E82]/20 text-[#4F9E82] flex items-center justify-center mx-auto mb-3">
@@ -378,7 +343,7 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
               ¡Venta Completada!
             </h3>
             <p className="text-xs text-[#8B95A3] mb-4">
-              La transacción y el descuento de stock se registraron en la base de datos.
+              La transacción y el descuento de stock se registraron atómicamente en la base de datos.
             </p>
 
             <div className="bg-[#0F1419] rounded-xl p-3 mb-4 space-y-1 text-xs">
@@ -396,7 +361,7 @@ export function VentAppVentaView({ initialProductos }: VentAppVentaViewProps) {
 
             <button
               onClick={() => setCompletedSale(null)}
-              className="w-full py-3 bg-[#5B8DEF] text-[#06121F] font-bold rounded-xl text-sm transition-all active:scale-95"
+              className="w-full py-3 bg-[#5B8DEF] text-[#06121F] font-bold rounded-xl text-sm transition-all active:scale-95 cursor-pointer"
             >
               Continuar vendiendo
             </button>

@@ -43,8 +43,8 @@ export function VentAppAnaliticaView({
 
   return (
     <div className="flex-1 flex flex-col bg-[#0F1419] text-[#E7EBEF] w-full">
-      {/* Header con soporte Safe-Area */}
-      <header className="flex items-center justify-between px-[20px] pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[14px] shrink-0">
+      {/* Header Fijo con soporte Safe-Area y Blur Nativo */}
+      <header className="sticky top-0 z-30 bg-[#0F1419]/90 backdrop-blur-md border-b border-[#232B34]/60 flex items-center justify-between px-5 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-3.5 shrink-0 transition-colors">
         <div>
           <h1 className="font-heading font-bold text-[19px] text-[#E7EBEF] tracking-tight">
             Analítica & Ventas
@@ -71,7 +71,7 @@ export function VentAppAnaliticaView({
       </header>
 
       {/* Body */}
-      <div className="flex-1 px-[18px] pb-6 min-h-0">
+      <div className="flex-1 px-5 pt-3.5 pb-6 min-h-0">
         {/* Date Chip */}
         <div className="flex items-center gap-[6px] bg-[#1A2129] border border-[#2A333D] rounded-[11px] px-[12px] py-[8px] text-[12px] font-semibold text-[#8B95A3] w-fit mb-[14px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} className="w-[13px] h-[13px]">
