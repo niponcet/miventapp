@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { ResumenDiario } from '@/types/database';
-import { formatCLP } from '@/components/ventapp/productUtils';
+import { formatCLP, formatDateFull } from '@/components/ventapp/productUtils';
 import styles from '@/app/(admin)/dashboard/dashboard.module.css';
 
 interface CierreCajaViewProps {
@@ -25,12 +25,7 @@ export function CierreCajaView({
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const margen = totalVentas > 0 ? ((gananciaNeta / totalVentas) * 100).toFixed(1) : '0';
-  const todayFormatted = new Intl.DateTimeFormat('es-CL', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date());
+  const todayFormatted = formatDateFull(new Date());
 
   const handleEjecutarCierre = async () => {
     setIsClosing(true);

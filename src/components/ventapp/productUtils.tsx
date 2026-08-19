@@ -12,6 +12,60 @@ export function formatCLP(val: number): string {
   }).format(val);
 }
 
+const MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const MONTHS_LONG = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+];
+const DAYS_LONG = [
+  'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'
+];
+
+/**
+ * Formatea una hora de manera determinista (24h) evitando discrepancias de hidratación SSR.
+ * Ejemplo: "14:32 hrs"
+ */
+export function formatTime24(fechaIso: string | null): string {
+  if (!fechaIso) return 'Reciente';
+  try {
+    const d = new Date(fechaIso);
+    if (isNaN(d.getTime())) return 'Reciente';
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    return `${h}:${m} hrs`;
+  } catch {
+    return 'Reciente';
+  }
+}
+
+/**
+ * Formatea una fecha corta determinista (ej. "19 ago").
+ */
+export function formatDateShort(fechaIso: string | null): string {
+  if (!fechaIso) return '';
+  try {
+    const d = new Date(fechaIso);
+    if (isNaN(d.getTime())) return '';
+    return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Formatea una fecha completa determinista (ej. "miércoles 19 de agosto de 2026").
+ */
+export function formatDateFull(d: Date = new Date()): string {
+  return `${DAYS_LONG[d.getDay()]} ${d.getDate()} de ${MONTHS_LONG[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+/**
+ * Formatea una fecha para chip (ej. "19 ago 2026").
+ */
+export function formatDateChip(d: Date = new Date()): string {
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 /**
  * Infiere una categoría amigable a partir del nombre o descripción del producto.
  */

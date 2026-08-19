@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import styles from './dashboard.module.css';
-import { formatCLP, getProductCategory } from '@/components/ventapp/productUtils';
+import { formatCLP, getProductCategory, formatDateFull, formatDateChip } from '@/components/ventapp/productUtils';
 
 export const metadata = {
   title: 'Analítica | MiVentApp',
@@ -97,12 +97,7 @@ export default async function DashboardPage() {
   );
 
   const today = new Date();
-  const dateFormatted = today.toLocaleDateString('es-CL', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const dateFormatted = formatDateFull(today);
 
   const kpis = [
     {
@@ -169,7 +164,7 @@ export default async function DashboardPage() {
               <rect x="3" y="4" width="18" height="18" rx="2" />
               <path d="M16 2v4M8 2v4M3 10h18" />
             </svg>
-            {today.toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' })}
+            {formatDateChip(today)}
           </div>
           <Link href="/ventapp" className={styles.btnPrimary}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>

@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import type { Producto } from '@/types/database';
 import { formatCLP, getProductCategory, getProductIcon } from './productUtils';
+import { ProfileButton } from './ProfileButton';
 
 interface VentAppInventarioViewProps {
   initialProductos: Producto[];
@@ -37,22 +38,18 @@ export function VentAppInventarioView({ initialProductos }: VentAppInventarioVie
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            href="/dashboard"
-            className="text-xs text-[#8B95A3] bg-[#1A2129] border border-[#2A333D] px-2.5 py-1.5 rounded-lg hover:text-white transition-colors"
-          >
-            ← Admin
-          </Link>
+          <ProfileButton />
           <button
             type="button"
             className="w-[38px] h-[38px] rounded-[12px] bg-[#212A34] border border-[#2A333D] flex items-center justify-center relative shrink-0 text-[#8B95A3] hover:text-white transition-colors active:scale-95 cursor-pointer"
             title="Notificaciones"
             aria-label="Notificaciones"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="w-[18px] h-[18px]">
-              <path d="M17 8.5a5 5 0 1 0-9.8 1.5L3 21l6.5-2a5 5 0 0 0 7.5-4.5" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
             </svg>
-            <span className="absolute -top-[3px] -right-[3px] w-[11px] h-[11px] rounded-full bg-[#C0526B] border-2 border-[#0F1419]" />
+            <span className="absolute -top-[3px] -right-[3px] w-[10px] h-[10px] rounded-full bg-[#C0526B] border-2 border-[#0F1419]" />
           </button>
         </div>
       </header>
